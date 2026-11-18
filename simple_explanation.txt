@@ -1,143 +1,94 @@
-# Simple Explanation of the Plant Disease Classification System
+Simple Explanation of the Plant Disease Classification System
 
-## 1. The Problem We Are Solving
+1. Project Overview
 
-Plant diseases damage crops, reduce farmer income, and lower food quality. But there is a big problem:
+The AI-Assisted Plant Disease Classification System is a web-based application designed to help users identify possible plant diseases from images of plant leaves. The system uses artificial intelligence and image classification to analyze an uploaded image and provide the most likely plant and disease category from the supported classes.
 
-- Most farmers and gardeners cannot tell **which disease** a plant has just by looking at it.
-- Real experts (plant doctors / agronomists) are few, expensive, and often far away.
-- By the time a farmer finds out what is wrong, the disease has already spread.
-- Wrong guesses lead to wrong chemical sprays, which waste money and harm the environment.
+The project is intended to support farmers, gardeners, students, and other users by providing quick preliminary information about plant health. The result is an AI-assisted estimate and should not be considered a guaranteed agricultural diagnosis. Important treatment and farming decisions should be confirmed by a qualified agricultural expert, plant pathologist, or agronomist.
 
-So the core problem is: **"How can a farmer quickly and cheaply find out what disease a plant has, using only a photograph?"**
+2. Problem Statement
 
-Our system tries to solve this by using Artificial Intelligence (AI) to look at a plant photo and tell the farmer the most likely disease, along with how confident the AI is.
+Plant diseases can damage crops, reduce agricultural productivity, affect farmer income, and lower food quality. Identifying a disease through visual inspection can be difficult, especially for people without specialist knowledge. Agricultural experts may also be unavailable, expensive, or difficult to reach.
 
-**Important note:** This system is an *assistant*, not a replacement for an expert. It gives an AI-assisted guess, and the farmer should confirm important decisions with a real agricultural expert.
+As a result, users may identify diseases incorrectly or apply unsuitable treatments. This project aims to provide an accessible image-based tool that can assist users in recognizing possible plant diseases at an early stage.
 
----
+3. Main Objective
 
-## 2. How It Works Step by Step
+The main objective of this project is to develop a web application that analyzes plant leaf images and provides an AI-assisted classification of the most likely plant disease or healthy plant condition.
 
-Think of it as a pipeline — one step passes its output to the next step.
+The planned system will support 38 plant and disease classes, including healthy plant classes. The final model performance and class mapping will be verified during the model research and training stage.
 
-1. **User Uploads an Image**
-   - The farmer takes a photo of the plant leaf with a phone or camera.
-   - The photo is uploaded through the web application.
+4. How the System Works
 
-2. **Image Processing (OpenCV + Pillow)**
-   - The system first checks the image is safe and valid (correct file type, not too large, not corrupted).
-   - The image is resized to a fixed size (224 x 224 pixels) because the model was trained on this exact size.
-   - The image is converted to RGB colour format.
-   - Any required normalization (scaling of pixel values) is applied so that the image looks the same to the model as the training images did.
+1. Image Upload
+   The user captures or selects an image of a plant leaf and uploads it through the web application.
 
-3. **Model Analysis (EfficientNetB3)**
-   - The processed image is passed to the trained **EfficientNetB3** deep learning model.
-   - The model compares the image's visual features (spots, colour, texture, leaf shape) with what it learned during training.
-   - It outputs a probability for each of the **38 possible classes** (plant + disease combinations, including healthy plants).
-   - The system picks the top 3 highest probabilities.
+2. Image Validation and Preparation
+   The application checks whether the uploaded image is suitable for analysis. The image is then prepared according to the preprocessing requirements established during model research and training.
 
-4. **Result Display**
-   - The app shows the predicted **plant name** and **disease name**.
-   - It shows the **confidence percentage**.
-   - It shows a **confidence state**:
-     - "High" = the AI is very sure
-     - "Review recommended" = the AI is somewhat sure
-     - "Uncertain" = the AI is not sure; treat the result with caution
-   - It shows the **top 3 alternatives** so the user sees what else it could be.
-   - It shows **educational info** about the disease (symptoms, prevention) from a reviewed knowledge base.
+3. AI-Based Image Analysis
+   The image is analyzed by the plant disease classification model. The selected model architecture for the project is EfficientNetB3 using TensorFlow and Keras.
 
----
+4. Classification Result
+   The system returns the most likely plant and disease category from the supported classes. Where applicable, the application may also present confidence information and other possible classifications.
 
-## 3. The Machine Learning Model
+5. User Interpretation
+   The result is presented as an AI-assisted estimate. Users are informed that image quality, training data, and real-world conditions can affect the result.
 
-**Model name:** EfficientNetB3 (with ImageNet pre-trained weights)
+5. Expected Benefits
 
-**What I built and trained:**
-- I used the **PlantVillage-style dataset**, where leaf images are already grouped into plant + disease folders.
-- I loaded all images at **224 x 224 pixels** in RGB, so that every image the model sees has the same size and format.
-- I used **EfficientNetB3** as the backbone (the "feature extractor") without its original top classification layer.
-- On top of the backbone, I designed my own classification head: a global max pooling layer, a 256-unit dense (ReLU) layer, a dropout of 0.3 (to prevent overfitting), and a final **38-unit softmax** layer that gives one probability for each of the 38 classes.
-- I trained the model in two stages using **transfer learning**: in stage one I froze the pre-trained base and trained only my new head; in stage two I unfroze the base and fine-tuned it at a lower learning rate.
-- I applied **data augmentation** during training (flipping, rotating, zooming) so the model does not memorise images but learns general patterns.
-- I trained with batch size 32 for around 40 epochs and saved the best-performing version of the model.
-- The trained model reached **99.54% accuracy on the validation data**.
+- Provides quick preliminary information about possible plant diseases.
+- Helps users become more aware of plant health problems.
+- Supports early investigation before consulting an agricultural expert.
+- Provides an accessible web-based interface for image classification.
+- Creates an educational project demonstrating the use of artificial intelligence in agriculture.
 
-**Why EfficientNetB3 and not a simple CNN?**
-- A basic CNN trained from scratch needs huge amounts of data and gives lower accuracy.
-- EfficientNetB3 is already trained on millions of images (ImageNet), so it already "knows" how to detect edges, shapes, textures, and colours.
-- We only teach it the *new* task (plant diseases) using our dataset — this is called **transfer learning**. It gives high accuracy with far less training time and data.
+6. Confirmed Technology Stack
 
-**Why 38 classes?**
-The dataset groups images by plant and condition. For example: "Tomato___Late_blight", "Tomato___healthy", "Potato___Early_blight", and so on. There are 38 such combinations in this dataset. The model outputs one probability per class, and we map the highest index back to its human-readable name using a saved `labels.json` file.
+Frontend
+- Next.js — web application framework.
+- TypeScript — frontend programming language.
+- Tailwind CSS — interface styling.
 
-**Why I trained my own model:**
-Rather than depending on someone else's saved model file, I trained my own model from scratch using the dataset. This gives me full control over the class ordering, the preprocessing settings, and the evaluation — and lets me document every artifact (the model file, the label list, the preprocessing settings, and the evaluation report) so the system is reproducible and explainable.
+Backend
+- Python — backend and machine-learning programming language.
+- FastAPI — backend API framework.
+- Pydantic — data validation for API requests and responses.
 
-**Honest limitation:** The 99.54% figure is on the PlantVillage-style dataset, where photos are clean and laboratory-like. Real field photos (poor light, blur, background clutter) will give lower accuracy. So the system clearly shows confidence levels and warns that results are AI estimates, not guaranteed diagnoses.
+Machine Learning
+- TensorFlow and Keras — machine-learning framework.
+- EfficientNetB3 — selected image-classification model architecture.
+- NumPy — numerical and image-array operations.
+- Pillow — image decoding and image handling.
 
----
+Database, Authentication, and Storage
+- Supabase PostgreSQL — database for application data.
+- Supabase Auth — user authentication and session management.
+- Supabase Storage — storage for uploaded plant images.
 
-## 4. The Technology Stack
+Development Tools
+- Docker and Docker Compose — local development and application setup.
+- pytest — backend and machine-learning testing.
+- Git and GitHub — version control and project collaboration.
 
-This is the set of tools and languages used to build the whole system (from the photo-upload screen to the AI model):
+7. Limitations and Responsible Use
 
-### Frontend (what the user sees in the browser)
-- **Next.js (App Router)** – the web framework that builds the pages.
-- **TypeScript** – a safer version of JavaScript that catches errors early.
-- **Tailwind CSS** – for styling and making the pages look clean and responsive (works on phone and desktop).
+The system is designed to provide AI-assisted classification, not professional agricultural diagnosis. Its performance may be affected by unclear images, poor lighting, background objects, unfamiliar plant conditions, or images outside the supported classes. The system should not automatically prescribe pesticides or replace professional agricultural advice.
 
-### Backend (the server that runs the AI and handles requests)
-- **Python 3.11+** – the main programming language of the backend.
-- **FastAPI** – a fast Python web framework that receives the image, runs the model, and returns the result.
-- **Pydantic** – validates that data (image requests, results) has the correct shape and types.
+8. Possible Future Enhancements
 
-### Machine Learning (the AI part)
-- **TensorFlow / Keras** – the library used to build, train, and load the EfficientNetB3 model.
-- **EfficientNetB3** – the deep learning model architecture (pre-trained on ImageNet).
-- **NumPy** – for numerical/matrix operations on image arrays.
-- **Pillow (PIL)** – for opening, decoding, and resizing uploaded images.
-- **OpenCV** – for image reading and image-processing operations (resizing, colour conversion, validation).
-- **Matplotlib / Seaborn** – for plotting training graphs and confusion matrices.
+The following features are possible future enhancements and are not considered part of the current basic system. They may be added if sufficient time and resources are available.
 
-### Database and Storage
-- **Supabase PostgreSQL** – the database that stores users, predictions, feedback, and disease information.
-- **Supabase Auth** – handles sign-up, sign-in, and secure login sessions.
-- **Supabase Storage** – stores uploaded plant images in a **private** bucket (only the owner can see them).
+- User accounts and prediction history so users can review previous analyses.
+- Detailed disease information, including symptoms, prevention, and educational references.
+- Top alternative predictions to show other possible classifications.
+- Image-quality guidance to help users upload clearer and more suitable photographs.
+- User feedback so predictions can be reviewed and used to improve future model development.
+- Support for additional plant species and disease classes after suitable data is collected and evaluated.
+- Multilingual support for users from different regions.
+- A mobile application or camera-based live scanning feature.
+- An expert review feature that allows users to request confirmation from an agricultural professional.
+- Improved testing with real-world field images and continuously updated training data.
+- Administrative tools for managing supported classes and educational disease information.
 
-### Security
-- **Row Level Security (RLS)** – database rules so one user can never read another user's predictions or images.
-- **Bearer-token authentication** – each request proves who the user is.
-- **Private storage + signed URLs** – images are not publicly accessible.
-
-### Development and Deployment
-- **Docker / Docker Compose** – to run the frontend and backend together locally.
-- **pytest** – for automated testing of the backend and model.
-- **Vercel** – deployment platform for the Next.js frontend.
-- **Render / Railway / Fly.io** – deployment platform for the FastAPI backend (any Python-capable host).
-- **Git / GitHub** – for version control and code sharing.
-
-### One-line summary of the stack
-> **Next.js + TypeScript + Tailwind** (frontend) → **FastAPI + Python** (backend) → **TensorFlow/Keras EfficientNetB3** (AI model) → **Supabase** (database, login, image storage).
-
----
-
-## 5. Quick Reference Table
-
-| Item | Value |
-| --- | --- |
-| Problem | Farmers cannot identify plant diseases quickly and cheaply from photos |
-| Solution | AI web app that classifies a plant photo into 38 plant/disease classes |
-| Model | EfficientNetB3 (ImageNet pre-trained, transfer learning) |
-| Dataset | PlantVillage-style leaf images (38 classes) |
-| Model head | Global max pooling → Dense(256, ReLU) → Dropout(0.3) → Dense(38, softmax) |
-| Training | Frozen base → fine-tuning; augmentation; batch size 32; ~40 epochs |
-| Trained accuracy | 99.54% on validation data |
-| Image processing | Pillow + OpenCV (decode, validate, resize, RGB convert, normalize) |
-| Output shown | Plant, disease, confidence %, confidence state, top-3 alternatives |
-| Frontend | Next.js, TypeScript, Tailwind CSS |
-| Backend | FastAPI, Python 3.11+, Pydantic |
-| Database / Auth / Storage | Supabase (PostgreSQL, Auth, private Storage) |
-| Deployment | Vercel + Render/Railway/Fly.io + Docker Compose |
-
-This system helps farmers make informed decisions while being clear about uncertainty in predictions.
+This project demonstrates how artificial intelligence, web technologies, and agricultural information can be combined to support plant disease awareness and informed decision-making.
