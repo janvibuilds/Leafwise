@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a complete web application that uses a retrained 38-class EfficientNetB3 model to classify plant-disease images through a FastAPI backend, with a Next.js frontend and Supabase Auth, PostgreSQL, and Storage.
+**Goal:** Build a complete web application that uses the original notebook-trained 38-class EfficientNetB3 model (packaged and verified from `Plant_Village_Detection_Model.h5`) to classify plant-disease images through a FastAPI backend, with a Next.js frontend and Supabase Auth, PostgreSQL, and Storage.
 
-**Architecture:** Next.js is the only browser-facing application. It authenticates users with Supabase Auth and sends the Supabase access token as a Bearer token to one FastAPI service. FastAPI verifies the user, validates and stores the image, runs the in-process TensorFlow/Keras model, persists the prediction, and returns a structured result. Supabase is used for Auth, PostgreSQL, and private image storage; the model is retrained before backend integration.
+**Architecture:** Next.js is the only browser-facing application. It authenticates users with Supabase Auth and sends the Supabase access token as a Bearer token to one FastAPI service. FastAPI verifies the user, validates and stores the image, runs the in-process TensorFlow/Keras model, persists the prediction, and returns a structured result. Supabase is used for Auth, PostgreSQL, and private image storage; the model is packaged and verified before backend integration.
 
 **Tech Stack:** Next.js App Router, TypeScript, Tailwind CSS, FastAPI, Pydantic, Python 3.11+, TensorFlow/Keras, EfficientNetB3, Pillow, pytest, Supabase Auth, Supabase PostgreSQL, Supabase Storage, Docker Compose.
 
@@ -13,9 +13,10 @@
 ## Global Constraints
 
 - Support all 38 classes represented in `plant-village-detection-99-54-accuracy.ipynb`, including healthy classes.
-- Retrain the EfficientNetB3 model because the original trained model file is unavailable.
+- Use the original notebook-trained model (`Plant_Village_Detection_Model.h5`) — packaged, weight-verified and converted to `.keras` — rather than a retrained replacement. Retrain only if the evaluation gate fails.
 - Do not execute the notebook in the production request path.
-- Use the exact documented preprocessing for both training and inference; prevent double normalization.
+- Use the exact documented preprocessing for both training and inference; the model contains an internal `Rescaling(1/255)`, so the runtime divides by 255 exactly once more (replicating training) and must never apply `preprocess_input`.
+- Resize with NEAREST to match the training generator; do not silently substitute bicubic.
 - The notebook's reported `99.53%` is not production accuracy until independently reproduced and documented.
 - The browser calls FastAPI for protected application operations; it does not receive the Supabase service-role key.
 - Use a private Supabase Storage bucket and enforce user ownership for prediction records and images.
@@ -26,8 +27,8 @@
 
 ## Review Focus
 
-- **Missing model artifact:** training must produce a loadable model, labels, preprocessing metadata, and metrics before any inference endpoint is integrated; test this in Task 1.
-- **Label/preprocessing mismatch:** a 38-output model with a different label order or normalization must fail startup or a model contract test; test this in Task 1 and Task 3.
+- **Model artifact integrity:** packaging must produce a loadable `.keras` model whose weights match the original `.h5` exactly, plus labels, preprocessing metadata, and metrics, before any inference endpoint is integrated; test this in Task 1.
+- **Label/preprocessing mismatch:** a 38-output model with a different label order, resize filter, or scaling must fail startup or a model contract test; test this in Task 1 and Task 3.
 - **Untrusted uploads:** corrupt, oversized, non-image, and unsupported images must produce safe validation errors without invoking the model; test this in Task 3 and Task 4.
 - **Cross-user access:** a valid user must not read, delete, or obtain image URLs for another user's prediction; test this in Task 2 and Task 4.
 - **Low-confidence output:** a low top score must produce `uncertain` rather than a falsely definitive diagnosis; test this in Task 3 and Task 6.
@@ -36,18 +37,25 @@
 
 ## File Map
 
-### Training and model artifacts
+### Model packaging and artifacts
+
+- Create: `backend/tools/convert_legacy_h5.py` — reproducible `Plant_Village_Detection_Model.h5` → `.keras` conversion with by-name weight verification.
+- Create: `backend/models/labels.json` — canonical output-index-to-label mapping recovered from the notebook's `class_indices` output.
+- Create: `backend/models/preprocessing.json` — image size, color mode, resize filter, scaling, and model version contract.
+- Create: `backend/models/metrics.json` — notebook-reported metrics (marked as not independently reproduced) and provisional threshold-selection results.
+- Create: `backend/models/MODEL_CARD.md` — dataset, training method, metrics, limitations, and intended use.
+- Generated/external: `backend/models/plant_disease_model.keras` — verified runtime artifact; keep outside Git (46 MB).
+- Reference/original: `Plant_Village_Detection_Model.h5` — original notebook artifact; keep outside Git (129 MB).
+
+### Training (deferred fallback)
+
+Only activated if the packaged model fails the evaluation gate:
 
 - Create: `training/config.yaml` — dataset paths, image size, batch size, seed, epochs, learning rates, and threshold-selection settings.
 - Create: `training/train.py` — reproducible two-stage EfficientNetB3 training and checkpoint export.
 - Create: `training/evaluate.py` — deterministic evaluation, per-class metrics, confusion matrix data, and model-card inputs.
 - Create: `training/requirements.txt` — training-only dependencies.
 - Create: `training/README.md` — dataset acquisition, commands, expected outputs, and licensing notes.
-- Create: `backend/models/labels.json` — canonical output-index-to-label mapping generated by training.
-- Create: `backend/models/preprocessing.json` — image size, color mode, scaling, and model version contract.
-- Create: `backend/models/metrics.json` — validation/test metrics and threshold-selection results.
-- Create: `backend/models/MODEL_CARD.md` — dataset, training method, metrics, limitations, and intended use.
-- Generated/external: `backend/models/plant_disease_model.keras` — verified model artifact; keep outside Git when appropriate.
 
 ### Supabase schema
 
@@ -104,25 +112,22 @@
 
 ---
 
-### Task 1: Retrain and Package the 38-Class Model
+### Task 1: Package and Verify the Original 38-Class Model
 
 **Files:**
-- Create: `training/config.yaml`
-- Create: `training/train.py`
-- Create: `training/evaluate.py`
-- Create: `training/requirements.txt`
-- Create: `training/README.md`
+- Create: `backend/tools/convert_legacy_h5.py`
 - Create: `backend/models/labels.json`
 - Create: `backend/models/preprocessing.json`
 - Create: `backend/models/metrics.json`
 - Create: `backend/models/MODEL_CARD.md`
 - Generate: `backend/models/plant_disease_model.keras`
-- Test: `training/tests/test_model_contract.py`
+- Reference: `Plant_Village_Detection_Model.h5` (original, unchanged)
+- Test: `backend/tests/test_model_contract.py`
 
 **Interfaces:**
-- Produces a 38-output model and canonical `labels.json` whose indexes exactly match the model output indexes.
-- Produces `preprocessing.json` with `image_size: [224, 224]`, RGB input, scaling behavior, and model version.
-- Produces `metrics.json` with dataset split description, overall metrics, per-class metrics, confusion-matrix data, and selected threshold.
+- Produces a 38-output model and canonical `labels.json` whose indexes exactly match the model output indexes (recovered from the notebook's `train_gen.class_indices` output).
+- Produces `preprocessing.json` with `image_size: [224, 224]`, RGB input, `nearest` resize, `/255` scaling, the internal-rescaling note, and model version.
+- Produces `metrics.json` with dataset split description, notebook-reported metrics explicitly marked as not independently reproduced, and the provisional selected thresholds.
 - Produces a loadable Keras model accepted by `ModelPredictor` in Task 3.
 
 - [ ] **Step 1: Write failing model-contract tests**
@@ -145,62 +150,54 @@ def test_preprocessing_contract_is_explicit():
     config = load_json("backend/models/preprocessing.json")
     assert config["image_size"] == [224, 224]
     assert config["color_mode"] == "rgb"
-    assert "normalization" in config
+    assert config["resize"]["interpolation"] == "nearest"
+    assert config["scaling"]["mode"] == "divide_by_255"
+    assert "internal_model_preprocessing" in config
 ```
 
 The tests initially fail because the generated assets do not exist.
 
 - [ ] **Step 2: Run the contract tests and verify the expected missing-artifact failure**
 
-Run: `pytest training/tests/test_model_contract.py -v`
+Run: `pytest backend/tests/test_model_contract.py -v`
 
 Expected: FAIL because the model package has not been generated yet.
 
-- [ ] **Step 3: Implement reproducible training**
+- [ ] **Step 3: Implement the reproducible conversion and metadata packaging**
 
-In `training/train.py`:
+In `backend/tools/convert_legacy_h5.py`:
 
-- Load the dataset from a configurable path; do not hardcode Kaggle paths.
-- Derive the canonical 38-class ordering deterministically from the training directory and write it once to `labels.json`.
-- Use 224×224 RGB inputs and the documented normalization contract.
-- Use training-only augmentation.
-- Use EfficientNetB3 with ImageNet weights, `include_top=False`, global max pooling, a 256-unit ReLU head, dropout `0.3`, and a 38-unit softmax output.
-- Train the classification head with the base frozen, then fine-tune according to the config at a lower learning rate.
-- Use fixed random seeds, checkpoint the best validation loss, and save the final `.keras` artifact.
-- Keep the original labeled validation directory as an external evaluation set where possible; document any split limitations caused by the source dataset.
+- Read `model_config` from `Plant_Village_Detection_Model.h5`.
+- Apply the minimal structural fix (unwrap single `input_layers`/`output_layers` references) that Keras 3.12 requires; the original file must not be modified.
+- Rebuild the model from the stored config and re-assign **every** weight matched by name against the original file; fail if any key, shape, or value differs.
+- Assert a 38-unit softmax output, run a smoke prediction, save `backend/models/plant_disease_model.keras`, reload it, and confirm the round trip is identical.
 
-In `training/evaluate.py`:
+Alongside it, generate:
 
-- Evaluate without augmentation and with deterministic ordering.
-- Calculate accuracy, macro precision, macro recall, macro F1, per-class metrics, confusion-matrix data, and top-three accuracy.
-- Select the uncertainty threshold from validation behavior and write it to `metrics.json`; do not hardcode `0.94` from the notebook example.
-- Generate the model card with dataset provenance, intended use, limitations, and the warning that PlantVillage-style validation does not establish field accuracy.
+- `labels.json` — the 38 class folders in the notebook's `class_indices` order.
+- `preprocessing.json` — the contract in §9.1.2 of the design spec (nearest resize, divide-by-255, internal rescaling note, EXIF handling).
+- `metrics.json` — notebook-reported train/validation metrics, dataset split sizes, known evaluation weaknesses, and provisional `uncertain`/`high` thresholds pending calibration.
+- `MODEL_CARD.md` — provenance, intended use, limitations, responsible-use notice, and threshold status.
 
-- [ ] **Step 4: Run training and evaluation in the documented environment**
+- [ ] **Step 4: Run the conversion and verification**
 
-Run from the training environment:
+Run: `python backend/tools/convert_legacy_h5.py`
 
-```bash
-pip install -r training/requirements.txt
-python training/train.py --config training/config.yaml
-python training/evaluate.py --config training/config.yaml
-```
-
-Expected: the model package contains a loadable `.keras` model, 38 labels, preprocessing metadata, metrics, and model card. If the dataset or GPU is unavailable, stop and document the missing external prerequisite rather than fabricating metrics.
+Expected: weight counts match, all weights verified by name/shape/value, 38-class smoke prediction valid, `.keras` written and reload-identical. If the original `.h5` is missing, stop and document the missing prerequisite rather than fabricating assets.
 
 - [ ] **Step 5: Run the contract tests again**
 
-Run: `pytest training/tests/test_model_contract.py -v`
+Run: `pytest backend/tests/test_model_contract.py -v`
 
 Expected: PASS for label count, output count, and preprocessing contract.
 
-- [ ] **Step 6: Commit the reproducible training package**
+- [ ] **Step 6: Commit the packaging assets**
 
-Commit training code and metadata only. Do not commit the binary model if repository limits or licensing make that inappropriate.
+Commit conversion code, metadata, and tests only. Do not commit either model binary (both are `.gitignore`d).
 
 ```bash
-git add training backend/models/labels.json backend/models/preprocessing.json backend/models/metrics.json backend/models/MODEL_CARD.md
-git commit -m "feat: add reproducible plant disease model training"
+git add backend/tools backend/models/labels.json backend/models/preprocessing.json backend/models/metrics.json backend/models/MODEL_CARD.md backend/tests/test_model_contract.py
+git commit -m "feat: package and verify original plant disease model"
 ```
 
 ---
@@ -533,7 +530,7 @@ Assert that the home page contains the upload CTA, the supported-class page rend
 
 - [ ] **Step 2: Implement the marketing shell and pages**
 
-Build responsive pages with clear navigation to sign-in and the application. Keep model methodology factual: EfficientNetB3, PlantVillage-style dataset, retraining/evaluation process, and known field-image limitations.
+Build responsive pages with clear navigation to sign-in and the application. Keep model methodology factual: EfficientNetB3, PlantVillage-style dataset, packaging/evaluation process, and known field-image limitations.
 
 - [ ] **Step 3: Run page tests and browser checks**
 
@@ -680,7 +677,7 @@ git add docker-compose.yml README.md docs backend frontend
 
 ## Execution Notes
 
-- The first external prerequisite is an authorized copy of the dataset used by the notebook. The plan must not fabricate a model artifact or metrics if the dataset is unavailable.
+- The model artifact prerequisite is satisfied: the original `Plant_Village_Detection_Model.h5` is packaged and weight-verified. The dataset is still required for *independent evaluation and threshold calibration*; until it is available, metrics remain notebook-reported and the plan must not invent independently reproduced numbers.
 - The first release intentionally supports one image per prediction. Multi-image analysis, PDF reports, admin editing, and a separate model service remain follow-up work unless explicitly added to scope.
-- If the retrained model fails the reality-check evaluation, keep the application architecture but revise the model scope, dataset, or user-facing claim before release; do not hide the result.
-- The implementation should preserve the original notebook as a research reference while moving reproducible training into `training/`.
+- If the packaged model fails the reality-check evaluation, keep the application architecture but activate the retraining fallback (or revise the model scope, dataset, or user-facing claim) before release; do not hide the result.
+- The implementation preserves the original notebook and `.h5` as research references; reproducible packaging lives in `backend/tools/`, and any future retraining lives in `training/`.

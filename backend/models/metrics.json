@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "model_version": "plant-village-effnetb3-original-v1",
+  "dataset": {
+    "name": "Plant Village (notebook training set)",
+    "train_samples": 70295,
+    "validation_samples": 17572,
+    "test_directory": "33 unlabeled images (no ground truth; unusable for evaluation)"
+  },
+  "metrics": {
+    "source": "Notebook-reported only — NOT independently reproduced (dataset not available in this environment).",
+    "independently_verified": false,
+    "train_accuracy": 0.9977949857711792,
+    "validation_accuracy": 0.9953334927558899
+  },
+  "known_evaluation_weaknesses": [
+    "The validation generator reused the augmenting training ImageDataGenerator with shuffle=True, so 'validation' accuracy is measured on augmented, shuffled data and is optimistic.",
+    "No held-out labeled test set was evaluated (test directory contains 33 unlabeled images).",
+    "No per-class precision/recall/F1 or confusion matrix was produced.",
+    "Plant Village is a controlled-background dataset; field-image performance is unknown and expected to be lower."
+  ],
+  "thresholds": {
+    "uncertain_below": 0.6,
+    "high_at_or_above": 0.9,
+    "status": "PROVISIONAL — pending calibration against a properly held-out labeled set. Do not treat as validated operating points."
+  },
+  "provenance": {
+    "notebook": "plant-village-detection-99-54-accuracy.ipynb",
+    "original_binary": "Plant_Village_Detection_Model.h5",
+    "runtime_binary": "backend/models/plant_disease_model.keras",
+    "conversion": "backend/tools/convert_legacy_h5.py (weights verified by name, shape, and exact value; reload round-trip identical)"
+  }
+}
