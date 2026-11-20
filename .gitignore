@@ -1,0 +1,33 @@
+# --- Model binaries (large; distributed via the packaging process, not git) ---
+Plant_Village_Detection_Model.h5
+*.h5
+backend/models/*.keras
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Secrets / local config ---
+.env
+.env.*
+!.env.example
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+npm-debug.log*
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

@@ -1,7 +1,8 @@
 # AI-Assisted Plant Disease Classification System — Design
 
 **Date:** 2026-11-18  
-**Status:** Final design approved; implementation not started  
+**Status:** Final design approved; implementation in progress  
+**Update:** 2026-11-20 — the original trained model artifact has been acquired and verified (see §1 and §9.1)  
 **Project type:** Final-year student project
 
 ## 1. Intent
@@ -10,7 +11,9 @@ Build a web-based, AI-assisted plant disease classification system that allows a
 
 The system is an educational and decision-support tool. It must not present an image-based prediction as a guaranteed agricultural diagnosis or automatically prescribe pesticides.
 
-The current research asset is `plant-village-detection-99-54-accuracy.ipynb`. It trains and evaluates an EfficientNetB3-based classifier using the New Plant Diseases / PlantVillage-style dataset and reports 38 classes. The original trained model file is not available, so the project will retrain the EfficientNetB3 model from the notebook workflow, correct the evaluation process, and package the newly generated model with its label mapping, preprocessing configuration, and evaluation report. The notebook remains a research/training artifact, not the application runtime.
+The current research asset is `plant-village-detection-99-54-accuracy.ipynb`. It trains and evaluates an EfficientNetB3-based classifier using the New Plant Diseases / PlantVillage-style dataset and reports 38 classes.
+
+**Update 2026-11-20 — model artifact acquired.** The original trained model produced by the notebook is now available as `Plant_Village_Detection_Model.h5` (saved with Keras 3.5.0, 129 MB, 38-class softmax output, validation accuracy 99.53% as reported by the notebook). The project therefore **packages and verifies this original model** — converting it to the runtime `.keras` format, recovering the exact class ordering from the notebook, and recording preprocessing and evaluation metadata — instead of retraining. Retraining is retained only as a fallback if the packaged model fails the evaluation gate. The notebook remains a research/training artifact, not the application runtime.
 
 ## 2. Confirmed technology choices
 
@@ -30,13 +33,13 @@ The first release will use **one FastAPI service** for application APIs and mode
 
 ### Confirmed model scope
 
-The first release supports **all 38 classes** represented in the notebook dataset, including healthy classes. The application will not hide classes from the model output. The canonical `labels.json` generated during retraining is the single source of truth for model-index-to-label mapping and will be used to seed the supported-classes and disease-information records.
+The first release supports **all 38 classes** represented in the notebook dataset, including healthy classes. The application will not hide classes from the model output. The canonical `labels.json` — with the class ordering recorded from the original notebook's `class_indices` output — is the single source of truth for model-index-to-label mapping and will be used to seed the supported-classes and disease-information records. Label order is an asset, not an assumption: it is never regenerated silently, and a retrained model must preserve it or version the asset.
 
 ## 3. Goals
 
 1. Provide a usable web interface for plant image upload and prediction.
-2. Retrain and verify an EfficientNetB3 classifier for all 38 classes represented in the notebook dataset.
-3. Package and serve the newly trained TensorFlow/Keras model through FastAPI.
+2. Package and verify the original notebook-trained EfficientNetB3 classifier for all 38 classes represented in the notebook dataset, with reproducible metrics and a documented evaluation process.
+3. Package and serve the verified TensorFlow/Keras model through FastAPI.
 4. Store users, prediction records, feedback, and disease information in Supabase.
 5. Secure authenticated operations and ensure users can access only their own prediction history.
 6. Show prediction confidence and top alternatives rather than only one unexplained label.
@@ -179,25 +182,56 @@ The UI must not imply that a probability is a clinically or agriculturally calib
 
 ## 9. Machine-learning design
 
-### 9.1 Baseline model and retraining decision
+### 9.1 Baseline model and packaging decision
 
-The notebook's final model is the EfficientNetB3-based model created after the initial custom CNN. It has a 38-class softmax output and is saved in the notebook with an H5 filename. Because the original trained file is unavailable, the project will **retrain the model** rather than search for or depend on an unverified prebuilt artifact.
+The notebook's final model is the EfficientNetB3-based model created after the initial custom CNN. In the saved artifact it is:
 
-The retraining workflow will:
+```text
+Sequential("sequential_2")
+├── InputLayer            (None, 224, 224, 3)
+├── Functional("efficientnetb3")   EfficientNetB3(include_top=False, weights="imagenet", pooling="max")
+│   └── internal preprocessing: Rescaling(1/255) → Normalization → Rescaling
+├── Dense(256, relu)      "dense_5"
+├── Dropout(0.3)          "dropout_2"
+└── Dense(38, softmax)    "dense_6"
+```
 
-1. Acquire the authorized New Plant Diseases / PlantVillage-style dataset in the training environment.
-2. Recreate the 38-class manifest from the dataset directories.
-3. Create deterministic train, validation, and labeled test handling.
-4. Reproduce the EfficientNetB3 transfer-learning architecture as a documented baseline.
-5. Use documented augmentation only for training.
-6. Save the best checkpoint based on validation performance.
-7. Evaluate the final checkpoint on a held-out labeled test set.
-8. Export the model in the format selected for the runtime, preferably `.keras` after loading verification.
-9. Save the exact class ordering, preprocessing configuration, model metadata, and metrics next to the model.
+It was compiled with Adamax (learning rate 0.001) and categorical crossentropy, and trained for 5 epochs (the notebook reports a validation accuracy of 99.53%).
 
-The notebook may be cleaned up or used as the starting point for a dedicated training script, but it must not be executed inside the production request path.
+**The original trained file is now available** as `Plant_Village_Detection_Model.h5` at the repository root. The project therefore **packages and verifies this artifact** instead of retraining. Retraining is retained only as a fallback (§9.1.3).
 
-The retraining output must produce and version these assets:
+#### 9.1.1 Verified properties of the provided model (2026-11-20)
+
+| Property | Finding |
+| --- | --- |
+| File | `Plant_Village_Detection_Model.h5`, 134,646,808 bytes, written by Keras 3.5.0, backend `tensorflow` |
+| Output | `softmax` over **38** classes ✓ |
+| Saved training config | categorical crossentropy, Adamax lr 0.001, metric `accuracy` |
+| Direct load on Keras 3.12 | **Fails.** The nested Functional stores `input_layers`/`output_layers` as a single-element list, which deserializes to a list-wrapped tensor, so the following `Dense` build receives `[(None, 1536)]` and raises `ValueError: Invalid dtype: tuple` |
+| Conversion | Config patched in memory (single input/output reference unwrapped), model rebuilt, then **all 501 weights re-assigned and verified by name, shape and exact value** against the original file → `backend/models/plant_disease_model.keras` (46.1 MB), reload round-trip identical |
+| Original file | Left untouched as the research artifact; conversion is reproducible via `backend/tools/convert_legacy_h5.py` |
+
+#### 9.1.2 Preprocessing contract (must match training exactly)
+
+1. Decode with Pillow, apply EXIF orientation, convert to **RGB**.
+2. Resize to **224×224 with NEAREST** — this matches `ImageDataGenerator`/`flow_from_dataframe`, whose default `interpolation="nearest"` was used in training. (The notebook's ad-hoc `predict()` helper used Pillow's default BICUBIC; the runtime follows training, not the helper.)
+3. Convert to float32 and **divide by 255** so inputs are in `[0, 1]`.
+4. Feed to the model. The model **already contains** `Rescaling(1/255)` followed by `Normalization` and a second `Rescaling`, so training was performed with **double scaling** (pixel value / 65025 entering the convolutional stack). The runtime replicates this deliberately; **do not** apply `keras.applications.efficientnet.preprocess_input` or any other normalization.
+5. Class order is the canonical `labels.json` mapping recovered from the notebook's `train_gen.class_indices` output (indexes 0–37, alphabetically ordered class folders).
+
+#### 9.1.3 Packaging workflow
+
+1. Verify the provided artifact: architecture, 38-class output, weight integrity (done — see §9.1.1).
+2. Convert to `.keras` for the runtime and keep the original `.h5` as the research artifact.
+3. Recover the exact class ordering from the notebook and write `labels.json`.
+4. Write `preprocessing.json` encoding §9.1.2 as an executable contract.
+5. Write `metrics.json` with the notebook-reported metrics, clearly marked as *not independently reproduced*.
+6. Write `MODEL_CARD.md` with provenance, intended use, limitations, and the provisional confidence thresholds.
+7. Keep the model-contract tests green: label count = output count = 38, contiguous indexes, explicit preprocessing contract.
+
+**Retraining fallback:** if the packaged model fails the evaluation gate (§9.2), the retraining workflow becomes active: acquire the authorized New Plant Diseases dataset, recreate the 38-class manifest, reproduce the EfficientNetB3 baseline with training-only augmentation, checkpoint on validation loss, evaluate on a held-out labeled test set, export `.keras`, and regenerate `labels.json`, `preprocessing.json`, `metrics.json`, and `MODEL_CARD.md`. The notebook must never be executed inside the production request path.
+
+The retraining/packaging output must produce and version these assets:
 
 ```text
 backend/models/
@@ -208,7 +242,7 @@ backend/models/
 └── MODEL_CARD.md
 ```
 
-The model artifact is generated during Phase 2 and is not committed to the source repository unless its size and licensing permit it. If it is stored externally, the model download/version process must be documented and reproducible.
+The model artifact is generated during Phase 2 and is not committed to the source repository unless its size and licensing permit it (both binaries exceed comfortable repository limits and are `.gitignore`d; the acquisition/conversion process is documented and reproducible).
 
 ### 9.2 Required model verification before integration
 
@@ -226,6 +260,8 @@ Before using the model in the application:
 10. Record the model version, dataset source, split method, metrics, and known limitations.
 
 The reported `99.53%` is treated as a notebook validation result until independently reproduced. It must not be presented as production accuracy.
+
+Two further evaluation weaknesses were confirmed while reviewing the notebook and are recorded in `metrics.json`: the validation generator was created with the *augmenting* `data_gen` (and `shuffle=True`) rather than a plain rescale-only generator, so the reported figure is not a clean hold-out measurement; and the notebook's `test/test` directory contains only 33 unlabeled images, so it cannot produce test accuracy. Independent reproduction (items 3–10 above) is blocked only on dataset availability and remains an open task before any accuracy claim is published.
 
 ### 9.3 Runtime prediction behavior
 
@@ -391,13 +427,18 @@ The API will use consistent error responses for invalid files, unauthenticated r
 ```text
 AI-assisted plant disease classification system/
 ├── frontend/
+├── Plant_Village_Detection_Model.h5      # original notebook artifact (git-ignored, research reference)
+├── plant-village-detection-99-54-accuracy.ipynb
 ├── backend/
 │   ├── app/
 │   ├── models/
-│   │   ├── plant_disease_model.keras
+│   │   ├── plant_disease_model.keras     # runtime artifact converted from the original .h5 (git-ignored)
 │   │   ├── labels.json
 │   │   ├── preprocessing.json
+│   │   ├── metrics.json
 │   │   └── MODEL_CARD.md
+│   ├── tools/
+│   │   └── convert_legacy_h5.py         # reproducible .h5 → .keras conversion with weight verification
 │   ├── tests/
 │   ├── requirements.txt
 │   └── Dockerfile
@@ -456,17 +497,18 @@ A seeded test user uploads a known fixture image, FastAPI runs the model, Supaba
 - Add repository documentation and local run instructions.
 - Confirm supported crops/classes and user roles.
 
-### Phase 2 — Model retraining and verification
+### Phase 2 — Model packaging and verification
 
-- Acquire the authorized dataset in the training environment.
-- Convert the notebook workflow into a reproducible training script or cleaned training notebook.
-- Retrain the EfficientNetB3 model for all 38 classes.
-- Correct validation/test evaluation.
-- Save the best verified model checkpoint.
-- Save labels and preprocessing configuration.
-- Produce model card and metrics report.
+- Acquire the original trained artifact (`Plant_Village_Detection_Model.h5`) — **done, 2026-11-20**.
+- Verify architecture, 38-class output and weight integrity; convert to the runtime `.keras` format with a reproducible script.
+- Recover the canonical 38-class ordering from the notebook and save `labels.json`.
+- Save `preprocessing.json`, `metrics.json`, and the model card.
+- Add model-contract tests (label/output count, contiguous indexes, preprocessing contract).
+- Independently reproduce evaluation metrics once the authorized dataset is available, and calibrate the confidence threshold on validation data.
 - Test real-world sample images.
 - Approve the model for integration only after the documented evaluation gate is met.
+
+If the packaged model fails the gate, activate the retraining fallback: acquire the authorized dataset, convert the notebook workflow into a reproducible training script, retrain EfficientNetB3 for all 38 classes with corrected validation/test evaluation, and regenerate the same asset set.
 
 ### Phase 3 — Supabase foundation
 
@@ -512,8 +554,8 @@ A seeded test user uploads a known fixture image, FastAPI runs the model, Supaba
 
 These do not change the approved architecture, but must be decided before the corresponding phase:
 
-1. Exact model artifact format: `.keras` preferred, `.h5` retained only if verified.
-2. Confidence threshold selected from validation data.
+1. ~~Exact model artifact format~~ — **resolved 2026-11-20:** runtime format is `.keras` (`backend/models/plant_disease_model.keras`, converted from and verified against the original `.h5`, which is retained as the research reference).
+2. Confidence threshold selected from validation data — **partially settled:** provisional `uncertain`/`high` thresholds are recorded in `metrics.json` and `MODEL_CARD.md` and are used by the predictor; final calibration against a validation set is still required before publication of any accuracy claim.
 3. Whether users can upload multiple images per prediction.
 4. Image retention period and delete behavior.
 5. Admin workflow for editing disease-information content.
