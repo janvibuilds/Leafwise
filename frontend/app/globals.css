@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-paper: #fffaf2;
+  --color-bone: #f5efe4;
+  --color-ink: #061a2b;
+  --color-teal: #22bd93;
+  --color-tealbright: #21bd94;
+  --color-lime: #e8fc47;
+  --color-night: #082033;
+  --font-sans: var(--font-inter), "Inter", Arial, sans-serif;
+  --font-display: var(--font-lora), "Lora", Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Display type scale — max = Figma px at 1728w, scales down with viewport */
+.d96 { font-size: clamp(42px, 5.556vw, 96px); }
+.d76 { font-size: clamp(40px, 4.4vw, 76px); }
+.d70 { font-size: clamp(38px, 4.05vw, 70px); }
+.d66 { font-size: clamp(36px, 3.82vw, 66px); }
+.d64 { font-size: clamp(36px, 3.7vw, 64px); }
+.d62 { font-size: clamp(34px, 3.59vw, 62px); }
+.d48 { font-size: clamp(34px, 2.78vw, 48px); }
+.d42 { font-size: clamp(30px, 2.43vw, 42px); }
+.d36 { font-size: clamp(28px, 2.08vw, 36px); }
+.d35 { font-size: clamp(28px, 2.03vw, 35px); }
+.d34 { font-size: clamp(26px, 1.97vw, 34px); }
+.d33 { font-size: clamp(26px, 1.91vw, 33px); }
+.d32 { font-size: clamp(24px, 1.85vw, 32px); }
+.d31 { font-size: clamp(24px, 1.8vw, 31px); }
+.d27 { font-size: clamp(22px, 1.56vw, 27px); }
+.d24 { font-size: clamp(20px, 1.39vw, 24px); }
+.d23 { font-size: clamp(20px, 1.33vw, 23px); }
+.d22 { font-size: clamp(19px, 1.27vw, 22px); }
+
+/* Hand-held scanner group (Figma 1:162, 650×760) — laid out at exact
+   design px, then scaled to fit smaller viewports without reflow. */
+.scan-wrap {
+  position: relative;
+  width: 325px;
+  height: 380px;
+  overflow: hidden;
+  margin-inline: auto;
+}
+.scan-group {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 650px;
+  height: 760px;
+  transform: scale(0.5);
+  transform-origin: top left;
+}
+@media (min-width: 640px) {
+  .scan-wrap { width: 455px; height: 532px; }
+  .scan-group { transform: scale(0.7); }
+}
+@media (min-width: 1024px) {
+  .scan-wrap { width: 553px; height: 646px; }
+  .scan-group { transform: scale(0.85); }
+}
+@media (min-width: 1536px) {
+  .scan-wrap { width: 650px; height: 760px; margin-inline: 0; }
+  .scan-group { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
