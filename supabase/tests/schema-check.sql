@@ -4,19 +4,19 @@
 
 do $$
 declare
-    table_name text;
+    check_name text;
     column_nullable text;
     disease_count integer;
 begin
-    foreach table_name in array array[
+    foreach check_name in array array[
         'profiles',
         'disease_information',
         'model_versions',
         'predictions',
         'prediction_feedback'
     ] loop
-        if to_regclass('public.' || table_name) is null then
-            raise exception 'Missing table public.%', table_name;
+        if to_regclass('public.' || check_name) is null then
+            raise exception 'Missing table public.%', check_name;
         end if;
     end loop;
 
@@ -57,7 +57,7 @@ begin
     into column_nullable
     from information_schema.columns
     where table_schema = 'public'
-      and table_name = 'predictions'
+      and information_schema.columns.table_name = 'predictions'
       and column_name = 'disease_information_id';
     if column_nullable <> 'YES' then
         raise exception 'predictions.disease_information_id must be nullable';
@@ -67,7 +67,7 @@ begin
     into column_nullable
     from information_schema.columns
     where table_schema = 'public'
-      and table_name = 'predictions'
+      and information_schema.columns.table_name = 'predictions'
       and column_name = 'model_version_id';
     if column_nullable <> 'NO' then
         raise exception 'predictions.model_version_id must be non-null';
@@ -83,14 +83,14 @@ begin
         raise exception 'prediction_feedback must uniquely constrain (prediction_id, user_id)';
     end if;
 
-    foreach table_name in array array['profiles', 'predictions', 'prediction_feedback'] loop
+    foreach check_name in array array['profiles', 'predictions', 'prediction_feedback'] loop
         if not exists (
             select 1
             from pg_class
-            where oid = ('public.' || table_name)::regclass
+            where oid = ('public.' || check_name)::regclass
               and relrowsecurity
         ) then
-            raise exception 'RLS is not enabled on public.%', table_name;
+            raise exception 'RLS is not enabled on public.%', check_name;
         end if;
     end loop;
 
@@ -98,7 +98,7 @@ begin
         select 1
         from information_schema.role_table_grants
         where table_schema = 'public'
-          and table_name in ('profiles', 'predictions', 'prediction_feedback')
+          and information_schema.role_table_grants.table_name in ('profiles', 'predictions', 'prediction_feedback')
           and grantee = 'anon'
     ) then
         raise exception 'anon must not receive grants on private application tables';
@@ -114,7 +114,7 @@ begin
         raise exception 'prediction-images must be a private 5 MB bucket';
     end if;
 
-    foreach table_name in array array[
+    foreach check_name in array array[
         'prediction_images_select_own',
         'prediction_images_insert_own',
         'prediction_images_delete_own'
@@ -124,9 +124,9 @@ begin
             from pg_policies
             where schemaname = 'storage'
               and tablename = 'objects'
-              and policyname = table_name
+              and policyname = check_name
         ) then
-            raise exception 'Missing Storage ownership policy: %', table_name;
+            raise exception 'Missing Storage ownership policy: %', check_name;
         end if;
     end loop;
 
