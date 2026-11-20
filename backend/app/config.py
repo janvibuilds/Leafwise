@@ -53,11 +53,17 @@ class Settings(BaseModel):
             raise SettingsError(
                 "Missing required environment variables: " + ", ".join(missing)
             )
+        service_key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+        if service_key.startswith("sb_publishable_"):
+            raise SettingsError(
+                "SUPABASE_SERVICE_ROLE_KEY must be a server-only Supabase secret "
+                "key (sb_secret_...), not an sb_publishable_ key."
+            )
         models_dir = os.environ.get("MODELS_DIR")
         return cls(
             environment=os.environ.get("ENVIRONMENT", "development"),
             supabase_url=os.environ["SUPABASE_URL"],
-            supabase_service_role_key=os.environ["SUPABASE_SERVICE_ROLE_KEY"],
+            supabase_service_role_key=service_key,
             supabase_jwt_secret=os.environ["SUPABASE_JWT_SECRET"],
             models_dir=Path(models_dir) if models_dir else DEFAULT_MODELS_DIR,
             max_upload_bytes=int(

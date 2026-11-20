@@ -121,6 +121,8 @@ Codes: `UNAUTHENTICATED`, `INVALID_IMAGE`, `IMAGE_TOO_LARGE`,
 
 ## Notes
 
+- Database schema, RLS policies, seed data, and the private storage bucket are
+  defined in [`supabase/`](../supabase/README.md) at the repository root.
 - Auth: browser sends `Authorization: Bearer <Supabase access token>`; FastAPI
   verifies the HS256 token locally with `SUPABASE_JWT_SECRET` (no network call).
 - The service-role key is server-only and never returned to the frontend.
