@@ -37,11 +37,50 @@ python backend/tools/convert_legacy_h5.py
 
 ```bash
 cd backend
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --env-file .env --reload   # dev
+python -m uvicorn app.main:app --env-file .env --port 8000  # as verified below
 ```
+
+`--env-file .env` is required: the app reads plain environment variables only
+and does not parse `.env` itself (tests inject `Settings` directly). Startup
+takes ~10–15 s while TensorFlow loads; `GET /health/live` returning
+`{"status":"live"}` means it is ready. Interactive docs: `http://127.0.0.1:8000/docs`
+(Swagger) and `/redoc`.
 
 `app.main:app` is created lazily (PEP 562 module `__getattr__`), so importing
 `create_app` in tests never loads TensorFlow.
+
+### Manual smoke test (no real Supabase needed)
+
+Health, auth, and inference work locally; persistence/storage endpoints
+(`/diseases`, `GET/DELETE /predictions`) require a live Supabase (Task 2).
+
+```bash
+curl http://127.0.0.1:8000/health/live
+curl http://127.0.0.1:8000/health/ready
+```
+
+Generate a Bearer token your local server will accept (same secret as
+`SUPABASE_JWT_SECRET` in `.env`):
+
+```python
+# python -  paste and run; prints a token for curl
+import time, jwt
+print(jwt.encode({"sub": "dev-user", "aud": "authenticated",
+                  "role": "authenticated", "exp": int(time.time()) + 3600},
+                 "your-jwt-secret", algorithm="HS256"))
+```
+
+```bash
+TOKEN=<printed token>
+curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8000/api/v1/me
+curl -H "Authorization: Bearer $TOKEN" -F "file=@path/to/leaf.jpg" \
+     http://127.0.0.1:8000/api/v1/predictions
+```
+
+Without a live Supabase, a successful prediction run ends in
+`502 STORAGE_ERROR` — that confirms auth + validation + model inference all
+worked and only the storage upload failed.
 
 ## Commands (run from the repository root)
 
