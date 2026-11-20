@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const links = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "38 Classes", href: "#classes" },
@@ -37,18 +39,18 @@ export default function Nav() {
       </ul>
 
       <div className="flex items-center gap-4 xl:gap-4">
-        <a
-          href="#quick-scan"
+        <Link
+          href="/login"
           className="text-[16px] leading-6 text-paper transition-opacity duration-200 hover:opacity-80"
         >
           Log in
-        </a>
-        <a
-          href="#quick-scan"
+        </Link>
+        <Link
+          href="/signup"
           className="flex h-[52px] w-[134px] items-center justify-center rounded-[30px] bg-paper text-[16px] leading-5 font-medium text-ink transition-colors duration-200 hover:bg-white"
         >
           Sign up&nbsp;&nbsp;↗
-        </a>
+        </Link>
       </div>
     </nav>
   );

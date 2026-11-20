@@ -6,7 +6,6 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import LivePreviewSection from "@/components/LivePreviewSection";
 import UseCasesSection from "@/components/UseCasesSection";
 import QuickScanSection from "@/components/QuickScanSection";
-import SiteFooter from "@/components/SiteFooter";
 
 /**
  * Leafwise landing page — sections assembled in Figma frame 1:31 order.
@@ -24,7 +23,6 @@ export default function Page() {
       <LivePreviewSection />
       <UseCasesSection />
       <QuickScanSection />
-      <SiteFooter />
     </main>
   );
 }
