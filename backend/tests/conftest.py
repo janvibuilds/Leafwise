@@ -18,7 +18,9 @@ if str(BACKEND_DIR) not in sys.path:
 
 os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
 os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
-os.environ.setdefault("SUPABASE_JWT_SECRET", "test-jwt-secret")
+os.environ.setdefault(
+    "SUPABASE_JWT_SECRET", "unit-test-jwt-secret-0123456789-abcdef"
+)
 
 from app.config import Settings  # noqa: E402
 from app.ml.model_metadata import load_model_metadata  # noqa: E402
@@ -32,7 +34,7 @@ def settings() -> Settings:
     return Settings(
         supabase_url="http://localhost:54321",
         supabase_service_role_key="test-service-role-key",
-        supabase_jwt_secret="test-jwt-secret",
+        supabase_jwt_secret="unit-test-jwt-secret-0123456789-abcdef",
     )
 
 
@@ -42,26 +44,55 @@ def metadata(settings: Settings):
 
 
 @pytest.fixture
-def make_client(settings: Settings, metadata):
-    """Build a TestClient. By default a FakePredictor is injected so no
-    TensorFlow import happens; pass ``predictor=None`` to build the real one
-    and any other object to inject a specific predictor/services."""
+def services(settings: Settings, metadata):
+    """In-memory service bundle (fake predictor, repos, storage)."""
+    from fakes import FakePredictor, build_services
+
+    return build_services(settings, metadata, FakePredictor(metadata))
+
+
+@pytest.fixture
+def make_client(settings: Settings, metadata, services):
+    """Build a TestClient with in-memory services injected.
+
+    - ``make_client()`` — fake services, no TensorFlow, no Supabase.
+    - ``make_client(predictor=custom)`` — rebuilds the prediction service
+      around ``custom`` while keeping the same repositories/storage.
+    - ``make_client(services=False)`` — build the real services (supabase).
+    """
     from fastapi.testclient import TestClient
 
     from app.main import create_app
-    from fakes import FakePredictor
+    from fakes import build_services
 
     def _make(
         *,
-        predictor=DEFAULT,
+        services_ns=DEFAULT,
+        predictor=None,
         app_settings: Settings | None = None,
         **kwargs,
     ):
-        if predictor is DEFAULT:
-            kwargs["predictor"] = FakePredictor(metadata)
-        elif predictor is not None:
-            kwargs["predictor"] = predictor
-        # predictor=None -> omit, so create_app builds the real one
+        ns = services if services_ns is DEFAULT else services_ns
+        if ns is False:
+            if predictor is not None:
+                kwargs["predictor"] = predictor
+        else:
+            if predictor is not None:
+                ns = build_services(
+                    settings,
+                    metadata,
+                    predictor,
+                    repo=ns.repo,
+                    storage=ns.storage,
+                    disease_repo=ns.disease_repo,
+                    feedback_repo=ns.feedback_repo,
+                )
+            kwargs.update(
+                predictor=ns.predictor,
+                prediction_service=ns.prediction_service,
+                disease_service=ns.disease_service,
+                feedback_service=ns.feedback_service,
+            )
         return TestClient(create_app(settings=app_settings or settings, **kwargs))
 
     return _make

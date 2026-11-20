@@ -49,9 +49,7 @@ class PredictionSummary(CamelModel):
     created_at: datetime
 
 
-class FeedbackRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
+class FeedbackRequest(CamelModel):
     is_correct: bool
     comment: str | None = Field(default=None, max_length=2000)
 
