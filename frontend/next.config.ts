@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Allow local subdomain hosts used for auth/session testing.
+  allowedDevOrigins: ["lvh.me", "*.lvh.me", "app.localhost", "*.localhost"],
   experimental: {
     agentFeedback: true,
   },

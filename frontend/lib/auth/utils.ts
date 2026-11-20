@@ -20,8 +20,14 @@ export function friendlyAuthError(message: string): string {
   if (normalized.includes("password should be")) {
     return "Choose a password with at least 8 characters.";
   }
+  if (normalized.includes("email rate limit") || normalized.includes("over_email_send")) {
+    return "Supabase's email limit is reached right now. Wait a little while and try again.";
+  }
   if (normalized.includes("rate limit") || normalized.includes("too many")) {
     return "Too many attempts. Please wait a moment and try again.";
+  }
+  if (normalized.includes("redirect url") || normalized.includes("redirect_url")) {
+    return "Sign-in is misconfigured. Ask the site owner to allow this redirect URL in Supabase.";
   }
   return "Something went wrong. Please try again.";
 }
