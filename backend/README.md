@@ -124,7 +124,8 @@ Codes: `UNAUTHENTICATED`, `INVALID_IMAGE`, `IMAGE_TOO_LARGE`,
 - Database schema, RLS policies, seed data, and the private storage bucket are
   defined in [`supabase/`](../supabase/README.md) at the repository root.
 - Auth: browser sends `Authorization: Bearer <Supabase access token>`; FastAPI
-  verifies the HS256 token locally with `SUPABASE_JWT_SECRET` (no network call).
+  verifies ES256/RS256 tokens against the project JWKS (cached per URL), with
+  HS256 + `SUPABASE_JWT_SECRET` retained for legacy projects.
 - The service-role key is server-only and never returned to the frontend.
 - Upload limits: `MAX_UPLOAD_BYTES` (default 5 MB) and `MAX_IMAGE_PIXELS`
   (default 40 MP), enforced before TensorFlow sees the payload.

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Annotated
 
 import jwt
 from fastapi import Header, Request
+from jwt.types import Options
 
 from app.config import Settings
 from app.errors import (
@@ -14,6 +17,8 @@ from app.errors import (
     UNAUTHENTICATED,
     ApiError,
 )
+
+logger = logging.getLogger("app.auth")
 
 
 @dataclass(frozen=True)
@@ -24,6 +29,52 @@ class CurrentUser:
     email: str | None
     role: str
     full_name: str | None
+
+
+# Supabase projects using asymmetric signing keys (ES256/RS256) publish a JWKS.
+# Projects using the legacy JWT secret issue HS256 tokens.
+_ASYMMETRIC_ALGORITHMS = frozenset(
+    {"ES256", "ES384", "ES512", "RS256", "RS384", "RS512"}
+)
+
+
+@lru_cache(maxsize=8)
+def _jwks_client(supabase_url: str) -> jwt.PyJWKClient:
+    return jwt.PyJWKClient(
+        f"{supabase_url.rstrip('/')}/auth/v1/.well-known/jwks.json",
+        cache_keys=True,
+    )
+
+
+def decode_access_token(token: str, settings: Settings) -> dict:
+    """Verify a Supabase access token with the project's configured algorithm."""
+    algorithm = jwt.get_unverified_header(token).get("alg")
+    # iat is issued by Supabase's clock; small skew between hosts is normal.
+    # exp/aud/sub are still verified.
+    shared_options: Options = {"require": ["exp", "sub"], "verify_iat": False}
+
+    if algorithm == "HS256":
+        return jwt.decode(
+            token,
+            settings.supabase_jwt_secret,
+            algorithms=["HS256"],
+            audience="authenticated",
+            options=shared_options,
+        )
+
+    if algorithm in _ASYMMETRIC_ALGORITHMS:
+        signing_key = _jwks_client(settings.supabase_url).get_signing_key_from_jwt(
+            token
+        )
+        return jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=[algorithm],
+            audience="authenticated",
+            options=shared_options,
+        )
+
+    raise jwt.InvalidTokenError(f"unsupported token algorithm: {algorithm}")
 
 
 def get_settings(request: Request) -> Settings:
@@ -57,8 +108,9 @@ def get_current_user(
 ) -> CurrentUser:
     """Verify ``Authorization: Bearer <Supabase access token>`` locally.
 
-    Supabase access tokens are HS256-signed with the project JWT secret, so
-    verification is a local decode (no network call) and fails closed.
+    Supabase projects may issue HS256 tokens (verified locally with the JWT
+    secret) or asymmetric ES256/RS256 tokens (verified against the project
+    JWKS, cached per URL). Both paths fail closed.
     """
     settings = get_settings(request)
     if not authorization:
@@ -68,16 +120,14 @@ def get_current_user(
         raise ApiError(401, UNAUTHENTICATED, "Authentication required.")
 
     try:
-        claims = jwt.decode(
-            token,
-            settings.supabase_jwt_secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-            options={"require": ["exp", "sub"]},
-        )
+        claims = decode_access_token(token, settings)
     except jwt.ExpiredSignatureError:
         raise ApiError(401, UNAUTHENTICATED, "Session expired.") from None
-    except jwt.InvalidTokenError:
+    except (jwt.InvalidTokenError, jwt.PyJWKClientError) as exc:
+        logger.warning("rejected access token: %s", exc)
+        raise ApiError(401, UNAUTHENTICATED, "Invalid session token.") from None
+    except Exception as exc:  # network/DNS failures while fetching JWKS
+        logger.warning("could not verify access token: %s", exc)
         raise ApiError(401, UNAUTHENTICATED, "Invalid session token.") from None
 
     app_metadata = claims.get("app_metadata") or {}
