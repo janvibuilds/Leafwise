@@ -53,6 +53,24 @@ To enable Google sign-in, turn on the Google provider in Supabase Auth and add
 the same callback URL to the provider's allowed redirects. The button is
 hidden from the user if the provider returns an error, with a safe message.
 
+### Sign-up without confirmation email (avoids email rate limits)
+
+By default Supabase sends a confirmation email on sign-up. On the free plan
+this can hit `over_email_send_rate_limit`, which blocks new users.
+
+To make sign-up log people in immediately with **no confirmation email**:
+
+1. Supabase Dashboard → **Authentication → Providers → Email**
+2. Turn **Confirm email** **OFF**
+3. Save
+
+The frontend already handles this: when Supabase returns an active session from
+`signUp`, the user is redirected straight to `app.<domain>/dashboard`. Password
+reset still uses email; that is the only remaining email-dependent flow.
+
+> Trade-off: anyone can sign up with any email address without proving ownership.
+> Fine for a demo/dev environment; re-enable confirmation before a real launch.
+
 ## Vercel
 
 Create two domains on the same Vercel project:
