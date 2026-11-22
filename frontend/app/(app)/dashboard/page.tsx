@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
+import { LuArrowRight } from "react-icons/lu";
 import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Dashboard · Leafwise" };
@@ -11,19 +12,19 @@ const cards = [
     href: "/predict",
     title: "Scan a leaf",
     body: "Upload a photo and see the top three matches with confidence states.",
-    action: "Start a scan →",
+    action: "Start a scan",
   },
   {
     href: "/history",
     title: "Your history",
     body: "Revisit earlier predictions and their private, short-lived image links.",
-    action: "View history →",
+    action: "View history",
   },
   {
     href: "/profile",
     title: "Your profile",
     body: "Review your account details and how your data is handled.",
-    action: "Open profile →",
+    action: "Open profile",
   },
 ];
 
@@ -57,8 +58,9 @@ export default async function DashboardPage() {
             <p className="mt-3 flex-1 text-[14px] leading-6 text-ink/65">
               {card.body}
             </p>
-            <span className="mt-6 text-[14px] font-medium text-teal group-hover:underline">
+            <span className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-teal group-hover:underline">
               {card.action}
+              <LuArrowRight aria-hidden="true" size={15} />
             </span>
           </Link>
         ))}

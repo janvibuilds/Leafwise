@@ -1,15 +1,23 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import {
+  LuHistory,
+  LuLayoutDashboard,
+  LuLogOut,
+  LuScanSearch,
+  LuUserRound,
+} from "react-icons/lu";
+import Brand from "@/components/Brand";
 import { signOut } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/session";
 
 export const instant = false;
 
 const navigation = [
-  { href: "/dashboard", label: "Dashboard", icon: "◫" },
-  { href: "/predict", label: "New scan", icon: "↥" },
-  { href: "/history", label: "History", icon: "◷" },
-  { href: "/profile", label: "Profile", icon: "◎" },
+  { href: "/dashboard", label: "Dashboard", icon: LuLayoutDashboard },
+  { href: "/predict", label: "New scan", icon: LuScanSearch },
+  { href: "/history", label: "History", icon: LuHistory },
+  { href: "/profile", label: "Profile", icon: LuUserRound },
 ];
 
 /** Authenticated application shell, served from the app subdomain. */
@@ -26,7 +34,7 @@ export default async function AppLayout({
           href="/dashboard"
           className="w-fit font-display text-[30px] leading-none text-ink"
         >
-          ❧ leafwise
+          <Brand />
         </Link>
         <p className="mt-2 text-[12px] tracking-[0.18em] text-ink/45 uppercase">
           Plant workspace
@@ -39,9 +47,11 @@ export default async function AppLayout({
               href={item.href}
               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] text-ink/75 transition hover:bg-bone hover:text-ink"
             >
-              <span aria-hidden="true" className="w-5 text-center text-teal">
-                {item.icon}
-              </span>
+              <item.icon
+                aria-hidden="true"
+                size={20}
+                className="shrink-0 text-teal"
+              />
               {item.label}
             </Link>
           ))}
@@ -55,8 +65,9 @@ export default async function AppLayout({
           <form action={signOut} className="mt-4">
             <button
               type="submit"
-              className="w-full rounded-xl border border-ink/15 px-4 py-2.5 text-[14px] font-medium text-ink transition hover:bg-bone"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-ink/15 px-4 py-2.5 text-[14px] font-medium text-ink transition hover:bg-bone"
             >
+              <LuLogOut aria-hidden="true" size={16} />
               Sign out
             </button>
           </form>
@@ -66,13 +77,14 @@ export default async function AppLayout({
       <div className="flex min-h-screen flex-col">
         <header className="flex items-center justify-between border-b border-ink/10 bg-paper px-6 py-4 lg:hidden">
           <Link href="/dashboard" className="font-display text-[24px]">
-            ❧ leafwise
+            <Brand />
           </Link>
           <form action={signOut}>
             <button
               type="submit"
-              className="rounded-full border border-ink/15 px-4 py-2 text-[13px] font-medium"
+              className="flex items-center gap-2 rounded-full border border-ink/15 px-4 py-2 text-[13px] font-medium"
             >
+              <LuLogOut aria-hidden="true" size={15} />
               Sign out
             </button>
           </form>

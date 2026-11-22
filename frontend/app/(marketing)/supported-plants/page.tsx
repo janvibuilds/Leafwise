@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LuArrowRight } from "react-icons/lu";
 import { serverApi } from "@/lib/api-server";
 import type { DiseaseInformation } from "@/lib/types";
 
@@ -89,7 +90,7 @@ export default async function SupportedPlantsPage() {
         href="/login"
         className="mt-8 inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper"
       >
-        Sign in to scan a leaf →
+        <>Sign in to scan a leaf <LuArrowRight aria-hidden="true" size={15} /></>
       </Link>
     </main>
   );

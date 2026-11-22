@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LuArrowRight } from "react-icons/lu";
 import { useState } from "react";
 import ImageUpload from "@/components/predictions/ImageUpload";
 import PredictionResult from "@/components/predictions/PredictionResult";
@@ -52,7 +53,7 @@ export default function PredictionFlow() {
           href="/login?next=%2Fpredict"
           className="inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper"
         >
-          Sign in again →
+          <>Sign in again <LuArrowRight aria-hidden="true" size={15} /></>
         </Link>
       )}
 
@@ -64,7 +65,7 @@ export default function PredictionFlow() {
               href={`/predictions/${result.id}`}
               className="rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper transition hover:bg-night"
             >
-              Open result & feedback →
+              <>Open result &amp; feedback <LuArrowRight aria-hidden="true" size={15} /></>
             </Link>
             <button
               type="button"

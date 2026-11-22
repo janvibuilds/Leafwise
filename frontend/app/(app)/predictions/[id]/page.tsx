@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LuArrowLeft } from "react-icons/lu";
 import { notFound } from "next/navigation";
 import PredictionDetailActions from "@/components/predictions/PredictionDetailActions";
 import PredictionResult from "@/components/predictions/PredictionResult";
@@ -32,8 +33,12 @@ export default async function PredictionDetailPage({
 
   return (
     <div>
-      <Link href="/history" className="text-[14px] text-teal hover:underline">
-        ← Back to history
+      <Link
+        href="/history"
+        className="inline-flex items-center gap-1.5 text-[14px] text-teal hover:underline"
+      >
+        <LuArrowLeft aria-hidden="true" size={15} />
+        Back to history
       </Link>
       <p className="mt-8 text-[13px] tracking-[0.16em] text-ink/45 uppercase">
         Saved prediction

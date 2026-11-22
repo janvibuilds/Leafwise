@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { LuArrowUpRight } from "react-icons/lu";
 import Nav from "./Nav";
 import UploadPill from "./UploadPill";
 import { heroBg } from "@/lib/assets";
@@ -54,9 +55,10 @@ export default function Hero() {
 
         <a
           href="#live-preview"
-          className="text-[16px] leading-6 text-paper underline underline-offset-[3px] transition-opacity duration-200 hover:opacity-80"
+          className="inline-flex items-center gap-1.5 text-[16px] leading-6 text-paper underline underline-offset-[3px] transition-opacity duration-200 hover:opacity-80"
         >
-          Try a sample leaf&nbsp;&nbsp;↗
+          Try a sample leaf
+          <LuArrowUpRight aria-hidden="true" size={16} />
         </a>
 
         <p className="text-[13px] leading-[19.5px] text-paper">

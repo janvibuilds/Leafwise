@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { LuArrowUpRight, LuCircleCheck } from "react-icons/lu";
+import Brand from "@/components/Brand";
 import { leafTomato } from "@/lib/assets";
 
 const predictions = [
@@ -49,7 +51,7 @@ export default function DiagnosticsSection() {
                 {/* Dashboard navigation — Figma 1:66 */}
                 <div className="flex items-start justify-between gap-4">
                   <span className="font-display text-[20px] leading-[27.6px] text-ink xl:text-[24px]">
-                    ❧ leafwise
+                    <Brand />
                   </span>
                   <span className="hidden text-[12px] leading-[18.6px] text-ink sm:block">
                     New scan&nbsp;&nbsp;&nbsp;&nbsp;My scans&nbsp;&nbsp;&nbsp;&nbsp;Photo
@@ -84,7 +86,8 @@ export default function DiagnosticsSection() {
                       illustration
                     </p>
                     <p className="w-fit rounded-[10px] bg-bone p-[10px] text-[12px] leading-[18.6px] text-ink">
-                      ✓ Resolution &amp; lighting passed
+                      <LuCircleCheck aria-hidden="true" size={13} className="mr-1 inline align-[-2px]" />
+                      Resolution &amp; lighting passed
                     </p>
                   </div>
 
@@ -163,7 +166,8 @@ export default function DiagnosticsSection() {
               href="#how-it-works"
               className="text-[17px] leading-[26.35px] text-ink transition-opacity duration-200 hover:opacity-70"
             >
-              Explore the model&nbsp;&nbsp;↗
+              Explore the model
+                <LuArrowUpRight aria-hidden="true" size={16} />
             </a>
           </div>
         </div>

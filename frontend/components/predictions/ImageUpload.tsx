@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
+import { LuArrowRight, LuCloudUpload } from "react-icons/lu";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -93,9 +94,10 @@ export default function ImageUpload({
               type="button"
               disabled={busy}
               onClick={() => file && onSubmit(file)}
-              className="rounded-full bg-ink px-6 py-3 text-[15px] font-medium text-paper transition hover:bg-night disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[15px] font-medium text-paper transition hover:bg-night disabled:opacity-60"
             >
-              {busy ? "Analyzing…" : "Analyze leaf →"}
+              {busy ? "Analyzing…" : "Analyze leaf"}
+              {!busy && <LuArrowRight aria-hidden="true" size={17} />}
             </button>
             <button
               type="button"
@@ -116,8 +118,8 @@ export default function ImageUpload({
           htmlFor="leaf-image"
           className="flex cursor-pointer flex-col items-center gap-4 py-10 text-center"
         >
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/15 text-[26px] text-teal">
-            ↥
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/15 text-teal">
+            <LuCloudUpload aria-hidden="true" size={26} />
           </span>
           <span className="font-display text-[24px] text-ink">
             Drop a leaf photo or browse

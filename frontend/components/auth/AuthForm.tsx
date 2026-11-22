@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { FaGoogle } from "react-icons/fa";
 import {
   signIn,
   signInWithGoogle,
@@ -126,9 +127,7 @@ export default function AuthForm({ mode, next = "/dashboard" }: AuthFormProps) {
           type="submit"
           className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-ink/20 bg-white text-[15px] font-medium text-ink transition hover:bg-bone"
         >
-          <span aria-hidden="true" className="text-[18px]">
-            G
-          </span>
+          <FaGoogle aria-hidden="true" size={18} />
           Continue with Google
         </button>
       </form>
