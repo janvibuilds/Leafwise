@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const links = [
   { label: "How It Works", href: "#how-it-works" },
-  { label: "38 Classes", href: "#classes" },
+  { label: "38 Classes", href: "/supported-plants" },
   { label: "Tech & Model", href: "#diagnostics" },
   { label: "Responsible Use", href: "#live-preview" },
 ];
@@ -28,12 +28,12 @@ export default function Nav() {
       <ul className="order-3 flex w-full list-none flex-wrap justify-center gap-x-[38px] gap-y-2 p-0 xl:order-none xl:w-auto xl:justify-start">
         {links.map((link) => (
           <li key={link.label}>
-            <a
+            <Link
               href={link.href}
               className="text-[16px] leading-6 text-paper transition-opacity duration-200 hover:opacity-80"
             >
               {link.label}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>

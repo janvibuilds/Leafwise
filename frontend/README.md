@@ -74,6 +74,30 @@ NEXT_PUBLIC_API_URL=https://your-fastapi-host
 Also add `https://app.your-domain.com` and `https://your-domain.com` to the
 FastAPI backend's `CORS_ORIGINS` before wiring the typed API client.
 
+## Prediction flow and API client
+
+The typed client lives in `lib/api-client.ts`:
+
+- `lib/api-browser.ts` — used in client components, attaches the current
+  Supabase access token from cookies.
+- `lib/api-server.ts` — used in Server Components with the server session.
+
+Set `NEXT_PUBLIC_API_URL` to the FastAPI base URL (default
+`http://127.0.0.1:8000`). The backend must allow both frontend origins in
+`CORS_ORIGINS`.
+
+App routes now wired to the API:
+
+- `/predict` — upload one JPEG/PNG/WEBP image (≤5 MB), preview, analyze, show
+  top-3 result with confidence state and responsible-use notice.
+- `/history` — last 20 predictions with delete confirmation.
+- `/predictions/[id]` — saved result, signed image link, one-per-prediction
+  feedback, and delete.
+- `/profile` — identity from `GET /api/v1/me`.
+
+Public marketing route `/supported-plants` renders all 38 classes from
+`GET /api/v1/diseases` (no auth required).
+
 ## Scripts
 
 ```bash

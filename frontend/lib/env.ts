@@ -21,6 +21,12 @@ export function getAppUrl(): string {
   );
 }
 
+export function getApiUrl(): string {
+  return trimTrailingSlash(
+    process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000",
+  );
+}
+
 export function getSupabaseUrl(): string {
   return process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 }
