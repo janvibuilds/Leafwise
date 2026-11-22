@@ -1,30 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ImageUpload from "@/components/predictions/ImageUpload";
 import PredictionResult from "@/components/predictions/PredictionResult";
 import { apiClient } from "@/lib/api-browser";
 import { LeafwiseApiError } from "@/lib/api-client";
-import { getSiteUrl } from "@/lib/env";
 import type { PredictionResponse } from "@/lib/types";
 
 export default function PredictionFlow() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
   const [busy, setBusy] = useState(false);
-  const router = useRouter();
 
   async function analyze(file: File) {
     setBusy(true);
     setError(null);
+    setAuthRequired(false);
     setResult(null);
     try {
       setResult(await apiClient.createPrediction(file));
     } catch (cause) {
       if (cause instanceof LeafwiseApiError && cause.status === 401) {
-        router.push(`${getSiteUrl()}/login?next=%2Fpredict`);
+        setAuthRequired(true);
+        setError("Your session expired. Sign in again to continue.");
         return;
       }
       setError(
@@ -41,8 +41,20 @@ export default function PredictionFlow() {
         busy={busy}
         error={error}
         onSubmit={analyze}
-        onClearError={() => setError(null)}
+        onClearError={() => {
+          setError(null);
+          setAuthRequired(false);
+        }}
       />
+
+      {authRequired && (
+        <Link
+          href="/login?next=%2Fpredict"
+          className="inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper"
+        >
+          Sign in again →
+        </Link>
+      )}
 
       {result && (
         <div className="space-y-5">

@@ -127,7 +127,13 @@ export async function proxy(request: NextRequest) {
     if (isAppPath(pathname)) {
       response = absoluteRedirect(`${getAppUrl()}${pathname}${search}`);
     } else if (user && isAuthPage(pathname)) {
-      response = absoluteRedirect(`${getAppUrl()}/dashboard`);
+      // Preserve `next` so a bounced 401 returns to the page the user was on.
+      const requested = new URLSearchParams(search.replace(/^\?/, "")).get("next");
+      const destination =
+        requested && requested.startsWith("/") && !requested.startsWith("//")
+          ? requested
+          : "/dashboard";
+      response = absoluteRedirect(`${getAppUrl()}${destination}`);
     } else {
       response = NextResponse.next({ request: { headers: request.headers } });
     }
