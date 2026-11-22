@@ -49,7 +49,7 @@ SavedModel rebuilt from the original `.h5` with exact weight verification:
 python backend/tools/convert_legacy_h5.py
 ```
 
-Both binaries are git-ignored (129 MB / 46 MB). Preprocessing replicates
+The original `.h5` stays git-ignored (research reference, ~129 MB); the runtime SavedModel (~90 MB) is committed so fresh clones can run the API. Preprocessing replicates
 training exactly — EXIF transpose → RGB → **NEAREST** 224×224 → ÷255 — see
 `backend/models/preprocessing.json` and `backend/models/MODEL_CARD.md`.
 

@@ -7,7 +7,7 @@ EfficientNetB3 classifier, and stores predictions in private Supabase Storage.
 
 | File | Purpose |
 | --- | --- |
-| `plant_disease_model_tf/` | Runtime TensorFlow SavedModel (git-ignored, rebuilt with `tools/convert_legacy_h5.py`) |
+| `plant_disease_model_tf/` | Runtime TensorFlow SavedModel (committed, ~90 MB; rebuilt with `tools/convert_legacy_h5.py`) |
 | `labels.json` | Authoritative 38-class index → label order (never regenerated silently) |
 | `preprocessing.json` | Exact runtime preprocessing contract (EXIF → RGB → NEAREST 224×224 → ÷255) |
 | `metrics.json` | Notebook-reported metrics (not independently reproduced) + provisional thresholds |

@@ -432,7 +432,7 @@ AI-assisted plant disease classification system/
 ├── backend/
 │   ├── app/
 │   ├── models/
-│   │   ├── plant_disease_model_tf/     # runtime artifact converted from the original .h5 (git-ignored)
+│   │   ├── plant_disease_model_tf/     # committed runtime SavedModel converted from the original .h5
 │   │   ├── labels.json
 │   │   ├── preprocessing.json
 │   │   ├── metrics.json
