@@ -12,7 +12,7 @@
 | Input | 224×224 RGB image |
 | Output | 38-way softmax probability vector |
 | Training framework | TensorFlow/Keras (original file saved with Keras 3.5.0) |
-| Runtime artifact | `backend/models/plant_disease_model.keras` (converted, weight-verified) |
+| Runtime artifact | `backend/models/plant_disease_model_tf/` (TensorFlow SavedModel; architecture rebuilt and all 501 original weights copied and verified) |
 | Research artifact | `Plant_Village_Detection_Model.h5` at repository root (never modified, never committed, never loaded at request time) |
 | Class order | `backend/models/labels.json` (authoritative; from the notebook's `class_indices`) |
 
@@ -71,4 +71,4 @@ These thresholds are **provisional pending calibration** against a properly held
 
 ## Conversion provenance
 
-`backend/tools/convert_legacy_h5.py` rebuilds the model from the original H5 config (with a minimal fix for the Keras 3.12 `input_layers`/`output_layers` deserialization incompatibility), reassigns every weight **by name**, verifies shape and exact value for all 501 weights, runs a smoke prediction, saves the `.keras` file, and verifies the reload round-trip is bit-identical.
+`backend/tools/convert_legacy_h5.py` rebuilds the documented architecture directly in Keras 3.12 (avoiding the legacy H5 nested-Functional deserialization bug), reassigns every H5 weight **by name**, verifies shape and exact value for all 501 weights, checks that different inputs produce different predictions, exports a TensorFlow SavedModel, and verifies the frozen-graph round-trip is identical. The `.keras` format is not used because Keras 3.12 mis-serializes this EfficientNet sub-model and silently changes its predictions.

@@ -208,7 +208,7 @@ It was compiled with Adamax (learning rate 0.001) and categorical crossentropy, 
 | Output | `softmax` over **38** classes ✓ |
 | Saved training config | categorical crossentropy, Adamax lr 0.001, metric `accuracy` |
 | Direct load on Keras 3.12 | **Fails.** The nested Functional stores `input_layers`/`output_layers` as a single-element list, which deserializes to a list-wrapped tensor, so the following `Dense` build receives `[(None, 1536)]` and raises `ValueError: Invalid dtype: tuple` |
-| Conversion | Config patched in memory (single input/output reference unwrapped), model rebuilt, then **all 501 weights re-assigned and verified by name, shape and exact value** against the original file → `backend/models/plant_disease_model.keras` (46.1 MB), reload round-trip identical |
+| Conversion | Architecture rebuilt in Keras 3.12 (avoiding the legacy nested-Functional deserialization bug), then **all 501 weights re-assigned and verified by name, shape and exact value** against the original file → `backend/models/plant_disease_model_tf/` TensorFlow SavedModel (93.4 MB), frozen-graph round-trip identical |
 | Original file | Left untouched as the research artifact; conversion is reproducible via `backend/tools/convert_legacy_h5.py` |
 
 #### 9.1.2 Preprocessing contract (must match training exactly)
@@ -235,7 +235,7 @@ The retraining/packaging output must produce and version these assets:
 
 ```text
 backend/models/
-├── plant_disease_model.keras
+├── plant_disease_model_tf/
 ├── labels.json
 ├── preprocessing.json
 ├── metrics.json
@@ -432,7 +432,7 @@ AI-assisted plant disease classification system/
 ├── backend/
 │   ├── app/
 │   ├── models/
-│   │   ├── plant_disease_model.keras     # runtime artifact converted from the original .h5 (git-ignored)
+│   │   ├── plant_disease_model_tf/     # runtime artifact converted from the original .h5 (git-ignored)
 │   │   ├── labels.json
 │   │   ├── preprocessing.json
 │   │   ├── metrics.json
@@ -554,7 +554,7 @@ If the packaged model fails the gate, activate the retraining fallback: acquire 
 
 These do not change the approved architecture, but must be decided before the corresponding phase:
 
-1. ~~Exact model artifact format~~ — **resolved 2026-11-20:** runtime format is `.keras` (`backend/models/plant_disease_model.keras`, converted from and verified against the original `.h5`, which is retained as the research reference).
+1. ~~Exact model artifact format~~ — **resolved 2026-11-22:** runtime format is a TensorFlow SavedModel (`backend/models/plant_disease_model_tf/`, converted from and verified against the original `.h5`, which is retained as the research reference). `.keras` was rejected because Keras 3.12 mis-serializes this EfficientNet sub-model.
 2. Confidence threshold selected from validation data — **partially settled:** provisional `uncertain`/`high` thresholds are recorded in `metrics.json` and `MODEL_CARD.md` and are used by the predictor; final calibration against a validation set is still required before publication of any accuracy claim.
 3. Whether users can upload multiple images per prediction.
 4. Image retention period and delete behavior.

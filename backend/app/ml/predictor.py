@@ -97,16 +97,37 @@ def build_result(
     )
 
 
-def _load_keras_model(path: Path):
-    """Default loader; imports Keras lazily so fakes never pull in TensorFlow."""
-    if not path.exists():
-        raise ModelUnavailableError(f"model file not found: {path.name}")
-    import keras  # noqa: PLC0415 - deliberate lazy import
+class SavedModelPredictor:
+    """Small adapter exposing the predict() contract for a TF SavedModel."""
 
-    try:
-        return keras.models.load_model(path, compile=False)
-    except Exception as exc:  # pragma: no cover - depends on local artifact
-        raise ModelUnavailableError("model file could not be loaded") from exc
+    input_shape = (None, 224, 224, 3)
+    output_shape = (None, 38)
+
+    def __init__(self, path: Path) -> None:
+        import tensorflow as tf  # noqa: PLC0415 - deliberate lazy import
+
+        if not path.exists():
+            raise ModelUnavailableError(f"model artifact not found: {path.name}")
+        try:
+            loaded = tf.saved_model.load(str(path))
+            self._signature = loaded.signatures["serving_default"]
+            self._input_key = next(iter(self._signature.structured_input_signature[1]))
+        except Exception as exc:  # pragma: no cover - depends on local artifact
+            raise ModelUnavailableError("model artifact could not be loaded") from exc
+
+    def predict(self, batch, verbose: int = 0):
+        import tensorflow as tf  # noqa: PLC0415 - deliberate lazy import
+
+        try:
+            output = self._signature(**{self._input_key: tf.constant(batch)})
+            return list(output.values())[0].numpy()
+        except Exception as exc:
+            raise ModelUnavailableError("model inference failed") from exc
+
+
+def _load_saved_model(path: Path) -> SavedModelPredictor:
+    """Default loader; imports TensorFlow lazily so fakes never load the model."""
+    return SavedModelPredictor(path)
 
 
 class KerasModelPredictor:
@@ -123,7 +144,7 @@ class KerasModelPredictor:
         self._metadata = metadata
         self._max_upload_bytes = max_upload_bytes
         self._max_pixels = max_pixels
-        loader = model_loader or _load_keras_model
+        loader = model_loader or _load_saved_model
         self._model = loader(metadata.model_path)
         self._validate_contract()
 

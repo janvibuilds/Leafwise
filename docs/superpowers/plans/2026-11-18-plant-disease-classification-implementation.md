@@ -44,7 +44,7 @@
 - Create: `backend/models/preprocessing.json` — image size, color mode, resize filter, scaling, and model version contract.
 - Create: `backend/models/metrics.json` — notebook-reported metrics (marked as not independently reproduced) and provisional threshold-selection results.
 - Create: `backend/models/MODEL_CARD.md` — dataset, training method, metrics, limitations, and intended use.
-- Generated/external: `backend/models/plant_disease_model.keras` — verified runtime artifact; keep outside Git (46 MB).
+- Generated/external: `backend/models/plant_disease_model_tf/` — verified runtime artifact; keep outside Git (46 MB).
 - Reference/original: `Plant_Village_Detection_Model.h5` — original notebook artifact; keep outside Git (129 MB).
 
 ### Training (deferred fallback)
@@ -120,7 +120,7 @@ Only activated if the packaged model fails the evaluation gate:
 - Create: `backend/models/preprocessing.json`
 - Create: `backend/models/metrics.json`
 - Create: `backend/models/MODEL_CARD.md`
-- Generate: `backend/models/plant_disease_model.keras`
+- Generate: `backend/models/plant_disease_model_tf/`
 - Reference: `Plant_Village_Detection_Model.h5` (original, unchanged)
 - Test: `backend/tests/test_model_contract.py`
 
@@ -142,7 +142,7 @@ def test_labels_have_38_contiguous_indexes():
 
 
 def test_model_output_matches_label_count():
-    model = load_model("backend/models/plant_disease_model.keras")
+    model = load_model("backend/models/plant_disease_model_tf/")
     assert model.output_shape[-1] == 38
 
 
@@ -170,7 +170,7 @@ In `backend/tools/convert_legacy_h5.py`:
 - Read `model_config` from `Plant_Village_Detection_Model.h5`.
 - Apply the minimal structural fix (unwrap single `input_layers`/`output_layers` references) that Keras 3.12 requires; the original file must not be modified.
 - Rebuild the model from the stored config and re-assign **every** weight matched by name against the original file; fail if any key, shape, or value differs.
-- Assert a 38-unit softmax output, run a smoke prediction, save `backend/models/plant_disease_model.keras`, reload it, and confirm the round trip is identical.
+- Assert a 38-unit softmax output, run a smoke prediction, save `backend/models/plant_disease_model_tf/`, reload it, and confirm the round trip is identical.
 
 Alongside it, generate:
 

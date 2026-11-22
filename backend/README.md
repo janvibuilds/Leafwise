@@ -7,7 +7,7 @@ EfficientNetB3 classifier, and stores predictions in private Supabase Storage.
 
 | File | Purpose |
 | --- | --- |
-| `plant_disease_model.keras` | Runtime model (git-ignored, rebuilt with `tools/convert_legacy_h5.py`) |
+| `plant_disease_model_tf/` | Runtime TensorFlow SavedModel (git-ignored, rebuilt with `tools/convert_legacy_h5.py`) |
 | `labels.json` | Authoritative 38-class index → label order (never regenerated silently) |
 | `preprocessing.json` | Exact runtime preprocessing contract (EXIF → RGB → NEAREST 224×224 → ÷255) |
 | `metrics.json` | Notebook-reported metrics (not independently reproduced) + provisional thresholds |
@@ -26,7 +26,7 @@ pip install pytest httpx ruff mypy                  # dev tools
 cp .env.example .env                                # fill in Supabase values
 ```
 
-If `backend/models/plant_disease_model.keras` is missing, rebuild it from the
+If `backend/models/plant_disease_model_tf/` is missing, rebuild it from the
 original notebook artifact at the repository root:
 
 ```bash

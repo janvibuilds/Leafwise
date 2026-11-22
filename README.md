@@ -42,8 +42,8 @@ The classifier was trained in the notebook
 99.53% — notebook-reported only, **not independently reproduced**). The
 notebook stays a research artifact and is never executed in the request path.
 
-The runtime uses `backend/models/plant_disease_model.keras`, converted from the
-original `.h5` with exact weight verification:
+The runtime uses `backend/models/plant_disease_model_tf/`, a TensorFlow
+SavedModel rebuilt from the original `.h5` with exact weight verification:
 
 ```bash
 python backend/tools/convert_legacy_h5.py

@@ -203,7 +203,7 @@ def load_model_metadata(models_dir: Path) -> ModelMetadata:
 
     return ModelMetadata(
         model_version=versions["labels.json"],
-        model_path=models_dir / "plant_disease_model.keras",
+        model_path=models_dir / "plant_disease_model_tf",
         labels=labels,
         preprocessing=preprocessing,
         preprocessing_contract=contract,

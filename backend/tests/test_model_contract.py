@@ -1,7 +1,8 @@
 """Model asset contract tests (labels, preprocessing, metrics, runtime model).
 
-The final test loads the real ``.keras`` model and runs one prediction; it is
-skipped when the runtime artifact has not been built on this machine.
+The final test loads the real SavedModel artifact and checks that different
+images produce different predictions. It is skipped when the artifact has not
+been built on this machine.
 """
 
 from __future__ import annotations
@@ -49,7 +50,7 @@ def test_thresholds_are_ordered_and_marked_provisional(metadata):
 
 def test_runtime_model_loads_and_predicts(metadata):
     if not metadata.model_path.exists():
-        pytest.skip("runtime .keras artifact not built on this machine")
+        pytest.skip("runtime SavedModel artifact not built on this machine")
 
     from app.ml.predictor import KerasModelPredictor
 
@@ -57,9 +58,18 @@ def test_runtime_model_loads_and_predicts(metadata):
         metadata, max_upload_bytes=5_000_000, max_pixels=40_000_000
     )
 
-    buf = io.BytesIO()
-    Image.new("RGB", (300, 200), (40, 120, 40)).save(buf, format="PNG")
-    result = predictor.predict(buf.getvalue())
+    def image_bytes(color: tuple[int, int, int]) -> bytes:
+        buf = io.BytesIO()
+        Image.new("RGB", (300, 200), color).save(buf, format="PNG")
+        return buf.getvalue()
+
+    result = predictor.predict(image_bytes((0, 0, 0)))
+    other = predictor.predict(image_bytes((255, 255, 255)))
+
+    assert (result.label, round(result.confidence, 4)) != (
+        other.label,
+        round(other.confidence, 4),
+    ), "model returned an identical result for clearly different images"
 
     assert result.model_version == metadata.model_version
     assert len(result.top_predictions) == 3
