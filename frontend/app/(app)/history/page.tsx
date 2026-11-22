@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import PredictionHistory from "@/components/predictions/PredictionHistory";
 import { requireUser } from "@/lib/auth/session";
@@ -7,6 +8,7 @@ export const metadata: Metadata = { title: "History · Leafwise" };
 export const instant = false;
 
 export default async function HistoryPage() {
+  await connection();
   await requireUser("/history");
 
   let rows: Awaited<ReturnType<typeof serverApi.listPredictions>> = [];

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Dashboard · Leafwise" };
@@ -27,6 +28,7 @@ const cards = [
 ];
 
 export default async function DashboardPage() {
+  await connection();
   const user = await requireUser("/dashboard");
   const firstName = user.user_metadata?.full_name?.split(" ")[0] || "there";
 

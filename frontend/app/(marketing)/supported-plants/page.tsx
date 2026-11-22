@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { serverApi } from "@/lib/api-server";
@@ -21,6 +22,7 @@ function groupByPlant(diseases: DiseaseInformation[]): Map<string, string[]> {
 }
 
 export default async function SupportedPlantsPage() {
+  await connection();
   let diseases: DiseaseInformation[] = [];
   let errorMessage: string | null = null;
   try {

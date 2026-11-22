@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import { serverApi } from "@/lib/api-server";
 import { requireUser } from "@/lib/auth/session";
@@ -6,6 +7,7 @@ export const metadata: Metadata = { title: "Profile · Leafwise" };
 export const instant = false;
 
 export default async function ProfilePage() {
+  await connection();
   await requireUser("/profile");
 
   let profile: Awaited<ReturnType<typeof serverApi.getMe>> | null = null;

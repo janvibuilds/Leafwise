@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AuthForm from "@/components/auth/AuthForm";
@@ -15,6 +16,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
+  await connection();
   const [{ next: requestedNext }, user] = await Promise.all([
     searchParams,
     getCurrentUser(),

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,6 +16,7 @@ export default async function PredictionDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await connection();
   await requireUser("/history");
   const { id } = await params;
 

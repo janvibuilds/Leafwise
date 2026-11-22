@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { signOut } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/session";
 
@@ -15,6 +16,7 @@ const navigation = [
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  await connection();
   const user = await requireUser("/dashboard");
 
   return (
