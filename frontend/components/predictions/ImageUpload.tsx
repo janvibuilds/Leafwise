@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/app/icons";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -68,7 +69,7 @@ export default function ImageUpload({
   const shownError = localError ?? error;
 
   return (
-    <div className="rounded-3xl border border-dashed border-ink/20 bg-paper p-6 sm:p-8">
+    <div className="rounded-2xl border border-dashed border-line bg-soft p-6 sm:p-8">
       <input
         ref={inputRef}
         id="leaf-image"
@@ -93,7 +94,7 @@ export default function ImageUpload({
               type="button"
               disabled={busy}
               onClick={() => file && onSubmit(file)}
-              className="rounded-full bg-ink px-6 py-3 text-[15px] font-medium text-paper transition hover:bg-night disabled:opacity-60"
+              className="app-btn-primary px-6 py-3 text-[15px]"
             >
               {busy ? "Analyzing…" : "Analyze leaf →"}
             </button>
@@ -105,7 +106,7 @@ export default function ImageUpload({
                 setFile(null);
                 if (inputRef.current) inputRef.current.value = "";
               }}
-              className="rounded-full border border-ink/15 px-6 py-3 text-[15px] font-medium text-ink transition hover:bg-bone disabled:opacity-60"
+              className="app-btn-quiet px-6 py-3 text-[15px]"
             >
               Choose another
             </button>
@@ -116,13 +117,13 @@ export default function ImageUpload({
           htmlFor="leaf-image"
           className="flex cursor-pointer flex-col items-center gap-4 py-10 text-center"
         >
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/15 text-[26px] text-teal">
-            ↥
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#168a45]">
+            <Icon name="upload" size={26} />
           </span>
-          <span className="font-display text-[24px] text-ink">
-            Drop a leaf photo or browse
+          <span className="text-[24px] font-bold tracking-[-0.025em] text-forest">
+            Drop your leaf photo here
           </span>
-          <span className="text-[14px] text-ink/55">
+          <span className="text-[14px] text-muted">
             One image at a time · JPEG, PNG or WEBP · up to 5 MB
           </span>
         </label>

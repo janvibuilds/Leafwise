@@ -50,7 +50,7 @@ export default function PredictionFlow() {
       {authRequired && (
         <Link
           href="/login?next=%2Fpredict"
-          className="inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper"
+          className="app-btn-dark px-6 py-3 text-[14px]"
         >
           Sign in again →
         </Link>
@@ -62,14 +62,14 @@ export default function PredictionFlow() {
           <div className="flex flex-wrap gap-4">
             <Link
               href={`/predictions/${result.id}`}
-              className="rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper transition hover:bg-night"
+              className="app-btn-dark px-6 py-3 text-[14px]"
             >
               Open result & feedback →
             </Link>
             <button
               type="button"
               onClick={() => setResult(null)}
-              className="rounded-full border border-ink/15 px-6 py-3 text-[14px] font-medium text-ink transition hover:bg-bone"
+              className="app-btn-quiet px-6 py-3 text-[14px]"
             >
               Scan another leaf
             </button>

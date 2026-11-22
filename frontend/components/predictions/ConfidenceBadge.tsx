@@ -6,17 +6,20 @@ const labels: Record<ConfidenceState, string> = {
   uncertain: "Uncertain",
 };
 
-const styles: Record<ConfidenceState, string> = {
-  high: "bg-teal/15 text-[#0d6f55] border-teal/30",
-  review_recommended: "bg-amber-100 text-amber-800 border-amber-300",
-  uncertain: "bg-red-50 text-red-700 border-red-200",
+const colors: Record<ConfidenceState, { background: string; color: string; dot: string }> = {
+  high: { background: "#e6f7ec", color: "#168a45", dot: "#25c65a" },
+  review_recommended: { background: "#fff4e0", color: "#a35a20", dot: "#f2c94c" },
+  uncertain: { background: "#fff0eb", color: "#a33b28", dot: "#ef6545" },
 };
 
 export default function ConfidenceBadge({ state }: { state: ConfidenceState }) {
+  const style = colors[state];
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-[12px] font-medium ${styles[state]}`}
+      className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold"
+      style={{ background: style.background, color: style.color }}
     >
+      <span className="h-2 w-2 rounded-full" style={{ background: style.dot }} />
       {labels[state]}
     </span>
   );
