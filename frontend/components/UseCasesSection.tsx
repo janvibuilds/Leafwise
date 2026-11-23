@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { LuArrowLeft, LuArrowRight, LuArrowUpRight } from "react-icons/lu";
 import { cropPotato, cropTomato } from "@/lib/assets";
 
 const stories = [
@@ -6,7 +7,7 @@ const stories = [
     eyebrow: "01 / HOME GARDENERS",
     quote: "“What’s happening to my tomatoes?”",
     body: "Spot early fungal-looking marks before they spread. Compare visible symptoms and keep a record of what changes over time.",
-    cta: "Start with a garden leaf  ↗",
+    cta: "Start with a garden leaf",
     image: cropTomato,
     alt: "Illustration of a tomato plant",
   },
@@ -14,7 +15,7 @@ const stories = [
     eyebrow: "02 / SMALLHOLDER FARMERS",
     quote: "“Which plants need a closer look?”",
     body: "Triage a suspicious leaf before speaking with an extension officer. Bring an image and a clearer question—not a treatment assumption.",
-    cta: "Prepare for a field visit  ↗",
+    cta: "Prepare for a field visit",
     image: cropPotato,
     alt: "Illustration of a potato plant",
   },
@@ -35,7 +36,9 @@ export default function UseCasesSection() {
             For everyone who grows.
           </h2>
           <p className="text-[16px] leading-[24.8px] text-ink" aria-hidden="true">
-            Real questions. Thoughtful next steps.&nbsp;&nbsp; ←&nbsp;&nbsp; →
+            Real questions. Thoughtful next steps.
+            <LuArrowLeft aria-hidden="true" size={16} className="mx-2 inline align-[-3px]" />
+            <LuArrowRight aria-hidden="true" size={16} className="inline align-[-3px]" />
           </p>
         </div>
 
@@ -57,9 +60,9 @@ export default function UseCasesSection() {
               </p>
               <a
                 href="#quick-scan"
-                className="mt-auto w-fit text-[15px] leading-[23.25px] text-ink transition-opacity duration-200 hover:opacity-70"
+                className="mt-auto inline-flex w-fit items-center gap-1.5 text-[15px] leading-[23.25px] text-ink transition-opacity duration-200 hover:opacity-70"
               >
-                {story.cta}
+                <>{story.cta}<LuArrowUpRight aria-hidden="true" size={16} /></>
               </a>
               <Image
                 src={story.image}
@@ -88,9 +91,10 @@ export default function UseCasesSection() {
             </p>
             <a
               href="#live-preview"
-              className="w-fit text-[15px] leading-[23.25px] text-ink transition-opacity duration-200 hover:opacity-70"
+              className="inline-flex w-fit items-center gap-1.5 text-[15px] leading-[23.25px] text-ink transition-opacity duration-200 hover:opacity-70"
             >
-              Explore the sample leaves&nbsp;&nbsp;↗
+              Explore the sample leaves
+              <LuArrowUpRight aria-hidden="true" size={16} />
             </a>
           </div>
         </div>

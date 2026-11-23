@@ -116,6 +116,12 @@ App routes now wired to the API:
 Public marketing route `/supported-plants` renders all 38 classes from
 `GET /api/v1/diseases` (no auth required).
 
+## Icons
+
+Icons come from `react-icons`, using the Lucide set (`react-icons/lu`) for UI
+icons and `FaGoogle` (`react-icons/fa`) for the Google brand mark. The shared
+`Brand` component keeps the leaf wordmark consistent across all layouts.
+
 ## Scripts
 
 ```bash

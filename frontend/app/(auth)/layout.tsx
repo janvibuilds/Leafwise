@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Brand from "@/components/Brand";
 
 /**
  * Auth shell. Sign-in, sign-up and password recovery share this split layout
@@ -43,7 +44,7 @@ function LinkBrand() {
       href="/"
       className="relative w-fit font-display text-[32px] leading-none text-paper transition-opacity hover:opacity-80"
     >
-      ❧ leafwise
+      <Brand />
     </Link>
   );
 }

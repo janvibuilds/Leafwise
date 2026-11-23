@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
 import {
   classesBg,
   cropApple,
@@ -150,9 +151,10 @@ export default function ClassesSection() {
             aria-label="Crop carousel (decorative in this static preview)"
           >
             <p className="text-[14px] leading-[21px] text-ink">01—06</p>
-            <p className="text-[28px] leading-[42px] text-ink" aria-hidden="true">
-              ←&nbsp;&nbsp;&nbsp;&nbsp;→
-            </p>
+            <span className="flex items-center gap-4 text-ink" aria-hidden="true">
+              <LuArrowLeft size={24} />
+              <LuArrowRight size={24} />
+            </span>
           </div>
         </div>
 

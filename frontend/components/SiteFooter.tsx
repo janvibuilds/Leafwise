@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Brand from "@/components/Brand";
 import { footerBg } from "@/lib/assets";
 
 const linkColumns = [
@@ -53,7 +54,7 @@ export default function SiteFooter() {
               href="#top"
               className="w-fit font-display text-[36px] leading-[55.8px] text-paper transition-opacity duration-200 hover:opacity-80"
             >
-              ❧ leafwise
+              <Brand />
             </a>
             <p className="text-[18px] leading-[27.9px] text-paper">
               A little clarity. A healthier harvest.

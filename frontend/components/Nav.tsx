@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { LuArrowUpRight } from "react-icons/lu";
+import Brand from "@/components/Brand";
 
 const links = [
   { label: "How It Works", href: "#how-it-works" },
@@ -22,7 +24,7 @@ export default function Nav() {
         href="#top"
         className="font-display text-[28px] leading-[37.4px] text-paper transition-opacity duration-200 hover:opacity-80 xl:text-[34px]"
       >
-        ❧ leafwise
+        <Brand />
       </a>
 
       <ul className="order-3 flex w-full list-none flex-wrap justify-center gap-x-[38px] gap-y-2 p-0 xl:order-none xl:w-auto xl:justify-start">
@@ -49,7 +51,8 @@ export default function Nav() {
           href="/signup"
           className="flex h-[52px] w-[134px] items-center justify-center rounded-[30px] bg-paper text-[16px] leading-5 font-medium text-ink transition-colors duration-200 hover:bg-white"
         >
-          Sign up&nbsp;&nbsp;↗
+          Sign up
+          <LuArrowUpRight aria-hidden="true" size={18} />
         </Link>
       </div>
     </nav>

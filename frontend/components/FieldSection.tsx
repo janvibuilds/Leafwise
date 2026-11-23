@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { LuArrowRight, LuCircleCheck, LuGlobe } from "react-icons/lu";
+import Brand from "@/components/Brand";
 import { handScanner, leafTomato } from "@/lib/assets";
 
 const photoTips = [
@@ -80,11 +82,13 @@ export default function FieldSection() {
                 {/* Browser bar */}
                 <div className="flex w-[125px] justify-between text-[10px] leading-[13.5px] text-ink">
                   <span>9:41</span>
-                  <span>leafwise.app&nbsp;&nbsp;◉</span>
+                  <span className="inline-flex items-center gap-1">
+                    leafwise.app <LuGlobe aria-hidden="true" size={10} />
+                  </span>
                 </div>
 
                 <p className="font-display text-[23px] leading-[31.05px] text-ink">
-                  ❧ leafwise
+                  <Brand />
                 </p>
                 <p className="font-display text-[19px] leading-[25.65px] text-ink">
                   A little closer to clarity.
@@ -117,10 +121,12 @@ export default function FieldSection() {
                 </div>
 
                 <div className="flex h-[36px] w-[244px] items-center justify-center rounded-[30px] bg-teal text-[12px] leading-[16.2px] text-ink">
-                  Analyze leaf&nbsp;&nbsp;→
+                  Analyze leaf
+                  <LuArrowRight aria-hidden="true" size={15} />
                 </div>
                 <p className="text-[10px] leading-[13.5px] text-ink">
-                  ✓ Saved to your scans
+                  <LuCircleCheck aria-hidden="true" size={13} className="mr-1 inline align-[-2px]" />
+                  Saved to your scans
                 </p>
               </div>
             </div>

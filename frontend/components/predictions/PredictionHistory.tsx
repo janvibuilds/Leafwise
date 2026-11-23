@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LuArrowRight } from "react-icons/lu";
 import { useState } from "react";
 import ConfidenceBadge from "@/components/predictions/ConfidenceBadge";
 import { apiClient } from "@/lib/api-browser";
@@ -49,7 +50,7 @@ export default function PredictionHistory({
           href="/predict"
           className="mt-6 inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper"
         >
-          Scan your first leaf →
+          <>Scan your first leaf <LuArrowRight aria-hidden="true" size={15} /></>
         </Link>
       </div>
     );

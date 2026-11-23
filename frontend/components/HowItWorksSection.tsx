@@ -1,21 +1,27 @@
 import Image from "next/image";
+import {
+  LuArrowRight,
+  LuChartNoAxesCombined,
+  LuMicroscope,
+  LuShieldCheck,
+} from "react-icons/lu";
 import { soilBg } from "@/lib/assets";
 
 const pillars = [
   {
-    icon: "✓",
+    icon: LuShieldCheck,
     title: "Image validation\n& preparation",
     body: "Quality checks help catch blurry or poorly lit images before normalizing each leaf for the model.",
     tag: "PILLOW  /  NUMPY",
   },
   {
-    icon: "◎",
+    icon: LuMicroscope,
     title: "EfficientNetB3\ninference",
     body: "The image is classified across 38 healthy and diseased leaf classes through a focused prediction API.",
     tag: "TENSORFLOW  /  FASTAPI",
   },
   {
-    icon: "%",
+    icon: LuChartNoAxesCombined,
     title: "Transparent\nestimates",
     body: "Read confidence scores, compare alternatives and understand the limits before your next step.",
     tag: "CONTEXT  /  RESPONSIBLE USE",
@@ -63,7 +69,7 @@ export default function HowItWorksSection() {
                 className="flex h-[128px] w-[128px] items-center justify-center rounded-full bg-paper font-display text-[54px] leading-[83.7px] text-ink"
                 aria-hidden="true"
               >
-                {pillar.icon}
+                <pillar.icon aria-hidden="true" size={52} />
               </div>
               <h3 className="d32 font-display leading-[1.16] whitespace-pre-line text-paper">
                 {pillar.title}
@@ -83,9 +89,11 @@ export default function HowItWorksSection() {
           {stack.map((item, index) => (
             <div key={item} className="flex items-center gap-8 xl:gap-[32px]">
               {index > 0 && (
-                <span className="text-[18px] leading-[27.9px] text-paper" aria-hidden="true">
-                  →
-                </span>
+                <LuArrowRight
+                  aria-hidden="true"
+                  size={18}
+                  className="text-paper"
+                />
               )}
               <span className="text-[12px] leading-[18.6px] text-paper">
                 {item}

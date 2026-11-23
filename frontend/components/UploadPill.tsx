@@ -1,3 +1,5 @@
+import { LuArrowRight, LuCloudUpload } from "react-icons/lu";
+
 type UploadPillProps = {
   /** Unique id — pairs the hidden file input with its labels. */
   id: string;
@@ -25,18 +27,17 @@ export default function UploadPill({ id, className = "" }: UploadPillProps) {
         htmlFor={id}
         className="flex min-w-0 cursor-pointer items-center gap-5 outline-offset-4 peer-focus-visible:outline-2 peer-focus-visible:outline-ink"
       >
-        <span aria-hidden="true" className="text-[28px] leading-[42px] text-ink">
-          ↥
-        </span>
+        <LuCloudUpload aria-hidden="true" size={26} className="shrink-0 text-ink" />
         <span className="text-[18px] leading-[27px] whitespace-nowrap text-ink">
           Drop leaf photo or browse
         </span>
       </label>
       <label
         htmlFor={id}
-        className="flex h-[52px] w-full cursor-pointer items-center justify-center rounded-[30px] bg-teal text-[16px] leading-5 font-medium whitespace-nowrap text-ink transition-colors duration-200 hover:bg-[#1cae83] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:w-[190px]"
+        className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-[30px] bg-teal text-[16px] leading-5 font-medium whitespace-nowrap text-ink transition-colors duration-200 hover:bg-[#1cae83] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:w-[190px]"
       >
-        Analyze leaf&nbsp;&nbsp;→
+        Analyze leaf
+        <LuArrowRight aria-hidden="true" size={18} />
       </label>
     </div>
   );
