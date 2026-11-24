@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/janvibuilds/Leafwise/security/advisories/new
+    about: Please report security issues privately via GitHub Security Advisories.
+  - name: Contributing guide
+    url: https://github.com/janvibuilds/Leafwise/blob/main/CONTRIBUTING.md
+    about: Setup, architecture, and workflow before opening a PR.

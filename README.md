@@ -10,9 +10,10 @@ for marketing, auth, and prediction history.
 | Area | Status |
 | --- | --- |
 | Model packaging & verification | ✅ done — original notebook model converted and weight-verified |
-| FastAPI backend (inference + authenticated API) | ✅ done — 53 tests, ruff + mypy clean |
-| Supabase schema, seed, and RLS policies | ⏳ next (plan Task 2) |
-| Next.js frontend (marketing, auth, prediction app) | ⏳ scaffold exists (plan Tasks 5–7) |
+| FastAPI backend (inference + authenticated API) | ✅ done — 60 tests, ruff + mypy clean |
+| Supabase schema, seed, and RLS policies | ✅ done — migrations + seed in `supabase/` |
+| Next.js frontend (marketing, auth, prediction app) | ✅ done — route groups, subdomain routing, typed API client |
+| CI (GitHub Actions) | ✅ done — lint, typecheck, tests, build on every PR |
 | Integration, security pass, deployment | ⏳ pending (plan Task 8) |
 
 Design and execution plan:
@@ -84,9 +85,10 @@ npm install
 npm run dev
 ```
 
-Auth, typed API client, and application pages land in plan Tasks 5–7. The
-frontend talks to FastAPI with the Supabase access token as a Bearer header;
-the service-role key never leaves the server.
+Auth, typed API client, and all application pages are implemented — see
+`frontend/README.md` for the local `lvh.me` setup. The frontend talks to
+FastAPI with the Supabase access token as a Bearer header; the service-role
+key never leaves the server.
 
 ## Environment variables
 
@@ -100,3 +102,17 @@ This is an educational/demo classifier trained on controlled-background Plant
 Village imagery. It is not a field diagnostic tool and must not be presented as
 agricultural or treatment advice. Confidence thresholds are provisional pending
 calibration — see `backend/models/MODEL_CARD.md`.
+
+## Contributing
+
+Contributions are welcome! Start with the
+[Contributing Guide](CONTRIBUTING.md) — it covers the architecture, local
+setup, quality gates, and PR workflow. All participants must follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+Found a security issue? Please report it privately via
+[SECURITY.md](SECURITY.md) instead of a public issue.
+
+## License
+
+Released under the [MIT License](LICENSE).
