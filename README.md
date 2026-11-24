@@ -1,40 +1,155 @@
-# Plant Disease Classification
+# Leafwise — Plant Disease Classification
 
-An AI-assisted plant disease classification system: a FastAPI backend that runs
-an EfficientNetB3 classifier (38 Plant Village classes) over authenticated
-uploads, stores predictions in private Supabase Storage, and a Next.js frontend
-for marketing, auth, and prediction history.
+Upload a photo of a leaf, get the three most likely diseases with confidence
+scores, and keep a private history of your scans. Leafwise is a full-stack
+AI application: a **Next.js** web app, a **FastAPI** inference service running
+an **EfficientNetB3** classifier over **38 Plant Village classes**, and
+**Supabase** for authentication, data, and private image storage.
 
-## Status
+```text
+  Leaf photo ──▶ Next.js ──▶ FastAPI ──▶ Supabase
+               (web app)   (classify)   (auth + data + images)
+```
 
-| Area | Status |
-| --- | --- |
-| Model packaging & verification | ✅ done — original notebook model converted and weight-verified |
-| FastAPI backend (inference + authenticated API) | ✅ done — 60 tests, ruff + mypy clean |
-| Supabase schema, seed, and RLS policies | ✅ done — migrations + seed in `supabase/` |
-| Next.js frontend (marketing, auth, prediction app) | ✅ done — route groups, subdomain routing, typed API client |
-| CI (GitHub Actions) | ✅ done — lint, typecheck, tests, build on every PR |
-| Integration, security pass, deployment | ⏳ pending (plan Task 8) |
+## Features
 
-Design and execution plan:
+- 🌿 **Leaf scanning** — upload a JPEG/PNG/WEBP (≤ 5 MB), get top-3
+  predictions with a confidence state and a responsible-use notice
+- 📊 **Personal history** — every scan is saved; revisit results, leave
+  feedback, or delete records and their images
+- 🔐 **Real auth** — email/password with reset flow **and** Google OAuth,
+  powered by Supabase Auth with cross-subdomain cookie sessions
+- 🗂 **Split domains** — marketing site on the main domain, private workspace
+  on the `app.` subdomain, routed automatically by `frontend/proxy.ts`
+- 🌍 **Public catalog** — browse all 38 supported plant/disease classes
+  without an account (`/supported-plants`)
+- ✅ **Quality gates** — 60 backend tests, ruff + mypy, ESLint + `tsc`, and a
+  CI workflow that runs everything on each pull request
 
-- `docs/superpowers/specs/2026-11-18-plant-disease-classification-design.md` — design spec
-- `docs/superpowers/plans/2026-11-18-plant-disease-classification-implementation.md` — execution plan
+## How it works
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│  Browser                                                          │
+│   ├─ lvh.me           → marketing + auth pages                    │
+│   └─ app.lvh.me       → dashboard / predict / history / profile    │
+└──────────────┬─────────────────────────────────────────────────────┘
+               │  Next.js proxy: refresh session, route by hostname
+               ▼
+┌────────────────────────────────────────────────────────────────────┐
+│  Next.js (frontend/)                                              │
+│   route groups: (marketing) · (auth) · (app)                      │
+│   typed API client attaches the user's Supabase access token       │
+└──────────────┬─────────────────────────────────────────────────────┘
+               │  Authorization: Bearer <access token>
+               ▼
+┌────────────────────────────────────────────────────────────────────┐
+│  FastAPI (backend/)                                               │
+│   verifies the token (Supabase JWKS) → validates the image        │
+│   → runs the classifier → stores image + prediction row            │
+└──────────────┬─────────────────────────────────────────────────────┘
+               ▼
+┌────────────────────────────────────────────────────────────────────┐
+│  Supabase                                                         │
+│   Auth (users) · Postgres (predictions, RLS) · Storage (private)  │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+Deep dives: [docs/architecture.md](docs/architecture.md) ·
+[docs/codebase-guide.md](docs/codebase-guide.md)
+
+## Tech stack
+
+| Layer | Technology | Why |
+| --- | --- | --- |
+| Frontend | Next.js 16 (App Router, Turbopack) | Server components, route groups, `proxy.ts` subdomain routing |
+| Styling | Tailwind CSS | Utility classes shared across marketing and app UIs |
+| Icons | `react-icons` (Lucide set) | Consistent, tree-shakeable icon set |
+| Backend | FastAPI + Pydantic | Typed request/response schemas, automatic Swagger docs |
+| ML | TensorFlow 2.x / EfficientNetB3 | The notebook-trained classifier, served as a packaged artifact |
+| Auth & data | Supabase (Auth, Postgres, Storage) | Managed JWT auth, RLS-protected tables, private buckets |
+| Quality | pytest · ruff · mypy · ESLint · GitHub Actions | Automated checks on every PR |
+
+## Quickstart
+
+Full walkthrough (env files, hosts entries, first prediction):
+**[docs/getting-started.md](docs/getting-started.md)**
+
+```bash
+# 1. Backend (terminal 1) — port 8000
+cd backend
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install pytest httpx ruff mypy
+cp .env.example .env                                # fill in Supabase values
+python -m uvicorn app.main:app --env-file .env --port 8000
+
+# 2. Frontend (terminal 2) — port 3000
+cd frontend
+npm install
+cp .env.example .env.local                          # fill in Supabase values
+npm run dev
+```
+
+Then open <http://lvh.me:3000> (sign up) and <http://app.lvh.me:3000>
+(workspace). Both require the `lvh.me` hosts entries described in
+[docs/getting-started.md](docs/getting-started.md).
 
 ## Repository layout
 
 ```text
-├── backend/                     FastAPI service (app/, models/, tools/, tests/)
-│   ├── app/                     API, services, ML inference, schemas
-│   ├── models/                  labels.json, preprocessing.json, metrics.json, MODEL_CARD.md
-│   ├── tools/convert_legacy_h5.py   reproducible .h5 → .keras conversion
-│   └── README.md                API surface, error codes, commands
-├── frontend/                    Next.js App Router scaffold
-├── docs/superpowers/            spec + implementation plan
-├── Plant_Village_Detection_Model.h5      original notebook artifact (git-ignored)
-├── plant-village-detection-99-54-accuracy.ipynb   research/training reference
-└── docker-compose.yml           (planned, Task 8)
+├── backend/                       FastAPI inference service
+│   ├── app/
+│   │   ├── api/                   route handlers (predictions, diseases, profile, health, feedback)
+│   │   ├── services/              business logic + Supabase repositories/storage
+│   │   ├── ml/                    predictor adapter, preprocessing, model metadata
+│   │   ├── schemas/               Pydantic request/response contracts
+│   │   ├── dependencies.py        JWT verification, service wiring
+│   │   ├── config.py              env settings + secret validation
+│   │   └── main.py                app factory, CORS, router registration
+│   ├── models/                    labels, preprocessing & metrics contracts, model card
+│   ├── tests/                     60 tests (fakes — no TensorFlow/Supabase needed)
+│   ├── tools/                     maintenance scripts
+│   └── README.md                  API surface, error codes, auth details
+├── frontend/                      Next.js web app
+│   ├── app/
+│   │   ├── (marketing)/           public pages: home, supported plants
+│   │   ├── (auth)/                login, signup, password reset, OAuth callback
+│   │   ├── (app)/                 workspace: dashboard, predict, history, profile, …
+│   │   └── api/auth/token/        server-side token bridge for the browser
+│   ├── proxy.ts                   session refresh + subdomain routing
+│   ├── lib/                       typed API client, auth helpers, Supabase clients, env
+│   ├── components/                marketing sections, app shell, prediction UI
+│   └── README.md                  frontend-specific setup (lvh.me, Vercel, Supabase URLs)
+├── supabase/                      reproducible database package
+│   ├── migrations/                schema + RLS policies + storage bucket
+│   ├── seed.sql                   38 disease rows + model version
+│   └── tests/schema-check.sql     verification query
+├── docs/                          ★ start here — guides and architecture
+│   ├── README.md                  documentation index + how we write docs
+│   ├── getting-started.md         clone → configure → run → first prediction
+│   ├── architecture.md            system design, request lifecycles, decisions
+│   └── codebase-guide.md          "I want to change X → look here"
+├── .github/                       issue templates, PR template, CI workflow
+├── CONTRIBUTING.md                contribution workflow and quality gates
+├── CODE_OF_CONDUCT.md             community standards
+├── SECURITY.md                    private vulnerability reporting
+└── LICENSE                        MIT
 ```
+
+## Documentation
+
+| Document | What it covers |
+| --- | --- |
+| [docs/README.md](docs/README.md) | **Documentation index and policy** — what lives where and when to update it |
+| [docs/getting-started.md](docs/getting-started.md) | Zero-to-first-prediction local setup, incl. troubleshooting |
+| [docs/architecture.md](docs/architecture.md) | System design, auth & prediction lifecycles, security model, key decisions |
+| [docs/codebase-guide.md](docs/codebase-guide.md) | File-by-file map: where to make each kind of change |
+| [backend/README.md](backend/README.md) | API endpoints, error codes, auth verification, test commands |
+| [frontend/README.md](frontend/README.md) | Route groups, proxy behavior, API client, Supabase/Vercel setup |
+| [supabase/README.md](supabase/README.md) | Applying the schema, seed, and security model |
+| [backend/models/MODEL_CARD.md](backend/models/MODEL_CARD.md) | Dataset, metrics, limitations, intended use |
+| `docs/superpowers/` | Original design spec and implementation plan |
 
 ## Model artifact
 
@@ -50,51 +165,59 @@ SavedModel rebuilt from the original `.h5` with exact weight verification:
 python backend/tools/convert_legacy_h5.py
 ```
 
-The original `.h5` stays git-ignored (research reference, ~129 MB); the runtime SavedModel (~90 MB) is committed so fresh clones can run the API. Preprocessing replicates
-training exactly — EXIF transpose → RGB → **NEAREST** 224×224 → ÷255 — see
-`backend/models/preprocessing.json` and `backend/models/MODEL_CARD.md`.
+The original `.h5` stays git-ignored (research reference, ~129 MB); the
+runtime SavedModel (~90 MB) is committed so fresh clones can run the API.
+Preprocessing replicates training exactly — EXIF transpose → RGB → **NEAREST**
+224×224 → ÷255 — see `backend/models/preprocessing.json` and
+`backend/models/MODEL_CARD.md`.
 
-## Backend quickstart
-
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-pip install pytest httpx ruff mypy          # dev tools
-cp .env.example .env                        # fill in Supabase values
-uvicorn app.main:app --reload
-```
-
-Commands (from the repository root):
+## Testing and quality gates
 
 ```bash
-python -m pytest backend/tests -v    # 53 tests
-python -m ruff check backend         # lint
-cd backend && python -m mypy app     # type check
-```
+# Backend (from the repository root)
+python -m pytest backend/tests -q   # 60 tests — use fakes, no TF/Supabase needed
+python -m ruff check backend        # lint (line length 100)
+cd backend && python -m mypy app    # static typing
 
-Health probes: `GET /health/live` (always 200) and `GET /health/ready`
-(503 until model assets load). API surface, error codes, and auth details are
-documented in `backend/README.md`.
-
-## Frontend quickstart
-
-```bash
+# Frontend
 cd frontend
-npm install
-npm run dev
+npm run lint                        # ESLint
+npm run typecheck                   # tsc --noEmit
+npm run build                       # production build smoke test
 ```
 
-Auth, typed API client, and all application pages are implemented — see
-`frontend/README.md` for the local `lvh.me` setup. The frontend talks to
-FastAPI with the Supabase access token as a Bearer header; the service-role
-key never leaves the server.
+All of these run automatically on pull requests via
+[.github/workflows/ci.yml](.github/workflows/ci.yml).
+
+Health probes while the API runs: `GET /health/live` (always 200) and
+`GET /health/ready` (503 until model assets load).
 
 ## Environment variables
 
-See `backend/.env.example` — `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-`SUPABASE_JWT_SECRET` are required; upload limits, bucket name, and CORS are
-optional with defaults.
+| Where | File | Purpose |
+| --- | --- | --- |
+| Backend | `backend/.env` (from `.env.example`) | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` required; upload limits, bucket name, CORS optional |
+| Frontend | `frontend/.env.local` (from `.env.example`) | Supabase publishable key, site/app URLs, API base URL |
+
+Secrets are git-ignored — never commit `.env` files. The service-role key is
+server-only and must never appear in any `NEXT_PUBLIC_` variable.
+
+## Status
+
+| Area | Status |
+| --- | --- |
+| Model packaging & verification | ✅ done — original notebook model converted and weight-verified |
+| FastAPI backend (inference + authenticated API) | ✅ done — 60 tests, ruff + mypy clean |
+| Supabase schema, seed, and RLS policies | ✅ done — migrations + seed in `supabase/` |
+| Next.js frontend (marketing, auth, prediction app) | ✅ done — route groups, subdomain routing, typed API client |
+| Documentation | ✅ done — guides, architecture, codebase tour (see [docs/](docs/README.md)) |
+| CI (GitHub Actions) | ✅ done — lint, typecheck, tests, build on every PR |
+| Integration, security pass, deployment | ⏳ pending (plan Task 8) |
+
+Design and execution plan:
+
+- `docs/superpowers/specs/2026-11-18-plant-disease-classification-design.md` — design spec
+- `docs/superpowers/plans/2026-11-18-plant-disease-classification-implementation.md` — execution plan
 
 ## Responsible use
 
