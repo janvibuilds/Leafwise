@@ -185,7 +185,7 @@ auth.users ──1:1── profiles
 | `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `LICENSE` | Community health files |
 | `backend/tools/` | Maintenance scripts run by maintainers (e.g. rebuilding the model artifact) |
 | `docs/superpowers/` | The original design spec and implementation plan |
-| `plant-village-detection-99-54-accuracy.ipynb` | Research/training notebook — never executed by the app |
+| `docs/research/plant-village-detection-99-54-accuracy.ipynb` | Research/training notebook — never executed by the app |
 
 ---
 

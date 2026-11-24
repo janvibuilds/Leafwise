@@ -129,7 +129,8 @@ Then open <http://lvh.me:3000> (sign up) and <http://app.lvh.me:3000>
 │   ├── README.md                  documentation index + how we write docs
 │   ├── getting-started.md         clone → configure → run → first prediction
 │   ├── architecture.md            system design, request lifecycles, decisions
-│   └── codebase-guide.md          "I want to change X → look here"
+│   ├── codebase-guide.md          "I want to change X → look here"
+│   └── research/                  original training notebook (research-only)
 ├── .github/                       issue templates, PR template, CI workflow
 ├── CONTRIBUTING.md                contribution workflow and quality gates
 ├── CODE_OF_CONDUCT.md             community standards
@@ -154,7 +155,8 @@ Then open <http://lvh.me:3000> (sign up) and <http://app.lvh.me:3000>
 ## Model artifact
 
 The classifier was trained in the notebook
-`plant-village-detection-99-54-accuracy.ipynb` (reported validation accuracy
+`docs/research/plant-village-detection-99-54-accuracy.ipynb` (reported
+validation accuracy
 99.53% — notebook-reported only, **not independently reproduced**). The
 notebook stays a research artifact and is never executed in the request path.
 

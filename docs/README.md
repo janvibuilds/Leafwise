@@ -13,6 +13,9 @@ far as you need.
 | 3 | [codebase-guide.md](codebase-guide.md) | Contributors | You know *what* you want to change and need to find *where* — a file-by-file map of backend, frontend, and database |
 | 4 | [superpowers/](superpowers/) | Historians | You want the original design spec and implementation plan that built the project |
 
+Also here: [`research/`](research/) — the original training notebook, kept as a
+research-only artifact (never executed by the app).
+
 Related documentation outside this folder:
 
 | Document | What it covers |
