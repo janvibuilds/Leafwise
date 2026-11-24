@@ -204,23 +204,6 @@ Health probes while the API runs: `GET /health/live` (always 200) and
 Secrets are git-ignored — never commit `.env` files. The service-role key is
 server-only and must never appear in any `NEXT_PUBLIC_` variable.
 
-## Status
-
-| Area | Status |
-| --- | --- |
-| Model packaging & verification | ✅ done — original notebook model converted and weight-verified |
-| FastAPI backend (inference + authenticated API) | ✅ done — 60 tests, ruff + mypy clean |
-| Supabase schema, seed, and RLS policies | ✅ done — migrations + seed in `supabase/` |
-| Next.js frontend (marketing, auth, prediction app) | ✅ done — route groups, subdomain routing, typed API client |
-| Documentation | ✅ done — guides, architecture, codebase tour (see [docs/](docs/README.md)) |
-| CI (GitHub Actions) | ✅ done — lint, typecheck, tests, build on every PR |
-| Integration, security pass, deployment | ⏳ pending (plan Task 8) |
-
-Design and execution plan:
-
-- `docs/superpowers/specs/2026-11-18-plant-disease-classification-design.md` — design spec
-- `docs/superpowers/plans/2026-11-18-plant-disease-classification-implementation.md` — execution plan
-
 ## Responsible use
 
 This is an educational/demo classifier trained on controlled-background Plant
