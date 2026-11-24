@@ -1,5 +1,11 @@
 # Leafwise — Plant Disease Classification
 
+[![CI](https://github.com/janvibuilds/Leafwise/actions/workflows/ci.yml/badge.svg)](https://github.com/janvibuilds/Leafwise/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.165-009688.svg)](https://fastapi.tiangolo.com)
+
 Upload a photo of a leaf, get the three most likely diseases with confidence
 scores, and keep a private history of your scans. Leafwise is a full-stack
 AI application: a **Next.js** web app, a **FastAPI** inference service running
