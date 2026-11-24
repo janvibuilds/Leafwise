@@ -49,7 +49,7 @@ export default function Nav() {
         </Link>
         <Link
           href="/signup"
-          className="flex h-[52px] w-[134px] items-center justify-center rounded-[30px] bg-paper text-[16px] leading-5 font-medium text-ink transition-colors duration-200 hover:bg-white"
+          className="flex h-[52px] w-[134px] gap-2 items-center justify-center rounded-[30px] bg-paper text-[16px] leading-5 font-medium text-ink transition-colors duration-200 hover:bg-white"
         >
           Sign up
           <LuArrowUpRight aria-hidden="true" size={18} />

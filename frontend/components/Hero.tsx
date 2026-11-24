@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { LuArrowUpRight } from "react-icons/lu";
 import Nav from "./Nav";
 import UploadPill from "./UploadPill";
 import { heroBg } from "@/lib/assets";
@@ -25,15 +24,16 @@ export default function Hero() {
         src={heroBg}
         alt=""
         fill
+        quality={100}
         priority
         sizes="100vw"
         aria-hidden="true"
-        className="object-cover object-center"
+        className="object-fit "
       />
 
       <Nav />
 
-      {/* Hero introduction — Figma 1:44 @304,174 1120×546, gap 24 */}
+      {/* Hero introduction */}
       <div className="relative z-10 mx-auto flex w-full max-w-[1120px] flex-col items-center gap-6 px-6 pt-8 pb-10 text-center xl:absolute xl:top-[174px] xl:left-1/2 xl:w-[1120px] xl:-translate-x-1/2 xl:pt-0 xl:pb-0">
         <p className="rounded-[30px] bg-white/[0.13] px-5 py-[9px] text-[13px] leading-[19.5px] tracking-[1.8px] text-paper">
           EFFICIENTNETB3&nbsp;&nbsp;•&nbsp;&nbsp;38 PLANT &amp; DISEASE CLASSES
@@ -52,14 +52,6 @@ export default function Hero() {
         </p>
 
         <UploadPill id="hero-upload" />
-
-        <a
-          href="#live-preview"
-          className="inline-flex items-center gap-1.5 text-[16px] leading-6 text-paper underline underline-offset-[3px] transition-opacity duration-200 hover:opacity-80"
-        >
-          Try a sample leaf
-          <LuArrowUpRight aria-hidden="true" size={16} />
-        </a>
 
         <p className="text-[13px] leading-[19.5px] text-paper">
           JPG or PNG&nbsp;&nbsp;·&nbsp;&nbsp;One leaf at a time&nbsp;&nbsp;·&nbsp;&nbsp;No
