@@ -57,32 +57,26 @@ export default function PredictionDetailActions({
     <div className="space-y-6">
       <form
         onSubmit={submitFeedback}
-        className="rounded-3xl border border-ink/10 bg-paper p-6"
+        className="app-card p-6"
       >
-        <h2 className="font-display text-[22px] text-ink">Was this helpful?</h2>
-        <p className="mt-2 text-[14px] text-ink/60">
+        <h2 className="text-[20px] font-bold text-forest">Was this helpful?</h2>
+        <p className="mt-2 text-[13px] text-muted">
           One response per prediction. Your feedback stays private.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => setIsCorrect(true)}
-            className={`rounded-full border px-5 py-2.5 text-[14px] font-medium transition ${
-              isCorrect === true
-                ? "border-teal bg-teal/15 text-[#0d6f55]"
-                : "border-ink/15 text-ink hover:bg-bone"
-            }`}
+            className="app-chip px-5 py-2.5 text-[13px]"
+            data-active={isCorrect === true}
           >
             Yes, looks right
           </button>
           <button
             type="button"
             onClick={() => setIsCorrect(false)}
-            className={`rounded-full border px-5 py-2.5 text-[14px] font-medium transition ${
-              isCorrect === false
-                ? "border-teal bg-teal/15 text-[#0d6f55]"
-                : "border-ink/15 text-ink hover:bg-bone"
-            }`}
+            className="app-chip px-5 py-2.5 text-[13px]"
+            data-active={isCorrect === false}
           >
             No, something is off
           </button>
@@ -93,17 +87,17 @@ export default function PredictionDetailActions({
           maxLength={2000}
           rows={3}
           placeholder="Optional note (max 2000 characters)"
-          className="mt-5 w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-[14px] outline-none focus:border-teal focus:ring-2 focus:ring-teal/30"
+          className="app-input mt-5"
         />
         <button
           type="submit"
           disabled={busy}
-          className="mt-4 rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-paper transition hover:bg-night disabled:opacity-60"
+          className="app-btn-dark mt-4 px-6 py-3 text-[14px]"
         >
           {busy ? "Saving…" : "Send feedback"}
         </button>
         {feedbackMessage && (
-          <p role="status" className="mt-4 text-[14px] text-teal">
+          <p role="status" className="mt-4 text-[13px] text-[#168a45]">
             {feedbackMessage}
           </p>
         )}
@@ -119,7 +113,7 @@ export default function PredictionDetailActions({
         type="button"
         onClick={remove}
         disabled={busy}
-        className="rounded-full border border-red-200 px-6 py-3 text-[14px] font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60"
+        className="app-btn-quiet px-6 py-3 text-[14px] text-cta"
       >
         Delete this prediction
       </button>

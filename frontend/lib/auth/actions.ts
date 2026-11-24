@@ -131,6 +131,24 @@ export async function updatePassword(
   redirect(`${getAppUrl()}/dashboard`);
 }
 
+export async function updateProfile(
+  _previous: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const fullName = text(formData, "fullName");
+  if (!fullName) {
+    return { error: "Enter a display name." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    data: { full_name: fullName },
+  });
+  if (error) {
+    return { error: friendlyAuthError(error.message) };
+  }
+  return { message: "Your profile has been saved." };
+}
+
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
